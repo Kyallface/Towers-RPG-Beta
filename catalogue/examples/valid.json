@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "entries": [
+    {
+      "id": "fire-bolt",
+      "name": "Fire Bolt",
+      "type": "Form",
+      "level": 2,
+      "pointCost": 3,
+      "effects": [
+        { "kind": "dice", "count": 2, "sides": 8, "damageType": "fire" },
+        { "kind": "range", "value": 30, "unit": "ft" }
+      ],
+      "description": "Example entry with two effect kinds. provisional is optional and defaults to false."
+    }
+  ]
+}

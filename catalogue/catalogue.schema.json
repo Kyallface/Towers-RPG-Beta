@@ -1,0 +1,120 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://towers-rpg.dev/schemas/catalogue/v1.json",
+  "title": "Towers RPG Card Catalogue",
+  "description": "Platform-neutral catalogue of reusable card components (Forms and Modifiers). Cards store catalogue IDs only; calculated values are always derived from the current catalogue. Stacking contract (schemaVersion 1): dice effects with the same damageType and sides combine by adding count; range effects add their value in feet; dice of the same damageType but different sides are an unsupported combination and must be reported as an error. Different effect kinds are never merged. See catalogue/README.md.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "entries"],
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Optional pointer to this schema for editor tooling."
+    },
+    "schemaVersion": {
+      "const": 1,
+      "description": "Catalogue format version. Readers must reject versions they do not support."
+    },
+    "entries": {
+      "type": "array",
+      "description": "Catalogue components. Each id must be unique within the catalogue; cards may reference the same id more than once.",
+      "items": { "$ref": "#/$defs/entry" }
+    }
+  },
+  "$defs": {
+    "slug": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9]*(-[a-z0-9]+)*$",
+      "maxLength": 64
+    },
+    "entry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "name", "type", "level", "pointCost", "effects", "description"],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/slug",
+          "description": "Stable, unique identifier stored on cards. Lowercase letters, digits and single hyphens, e.g. \"physical\" or \"long-range\". Never infer behaviour from the id."
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80,
+          "description": "Display name."
+        },
+        "type": {
+          "enum": ["Form", "Modifier"],
+          "description": "Component category (case-sensitive)."
+        },
+        "level": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 20
+        },
+        "pointCost": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Cost of one occurrence of this component on a card."
+        },
+        "provisional": {
+          "type": "boolean",
+          "default": false,
+          "description": "True when level and pointCost are placeholder values, not authoritative balance decisions."
+        },
+        "effects": {
+          "type": "array",
+          "minItems": 1,
+          "description": "Structured effects contributed by one occurrence of this component.",
+          "items": { "$ref": "#/$defs/effect" }
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        }
+      }
+    },
+    "effect": {
+      "oneOf": [{ "$ref": "#/$defs/diceEffect" }, { "$ref": "#/$defs/rangeEffect" }]
+    },
+    "diceEffect": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "count", "sides", "damageType"],
+      "properties": {
+        "kind": { "const": "dice" },
+        "count": { "type": "integer", "minimum": 1, "maximum": 20, "description": "Number of dice per occurrence." },
+        "sides": { "enum": [4, 6, 8, 10, 12, 20], "description": "Die size." },
+        "damageType": { "$ref": "#/$defs/slug", "description": "Damage type slug, e.g. \"physical\"." }
+      }
+    },
+    "rangeEffect": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "value", "unit"],
+      "properties": {
+        "kind": { "const": "range" },
+        "value": { "type": "integer", "minimum": 1, "maximum": 1000, "description": "Range added per occurrence." },
+        "unit": { "const": "ft" }
+      }
+    }
+  },
+  "examples": [
+    {
+      "schemaVersion": 1,
+      "entries": [
+        {
+          "id": "physical",
+          "name": "Physical",
+          "type": "Form",
+          "level": 1,
+          "pointCost": 1,
+          "provisional": true,
+          "effects": [{ "kind": "dice", "count": 1, "sides": 6, "damageType": "physical" }],
+          "description": "A basic physical strike."
+        }
+      ]
+    }
+  ]
+}

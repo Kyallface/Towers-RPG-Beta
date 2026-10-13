@@ -1,0 +1,26 @@
+{
+  "$schema": "./catalogue.schema.json",
+  "schemaVersion": 1,
+  "entries": [
+    {
+      "id": "physical",
+      "name": "Physical",
+      "type": "Form",
+      "level": 1,
+      "pointCost": 1,
+      "provisional": true,
+      "effects": [{ "kind": "dice", "count": 1, "sides": 6, "damageType": "physical" }],
+      "description": "Channels raw force into the card. Each Physical adds one d6 of physical damage."
+    },
+    {
+      "id": "range",
+      "name": "Range",
+      "type": "Modifier",
+      "level": 1,
+      "pointCost": 1,
+      "provisional": true,
+      "effects": [{ "kind": "range", "value": 10, "unit": "ft" }],
+      "description": "Extends the card's reach. Each Range adds 10 feet."
+    }
+  ]
+}

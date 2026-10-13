@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "entries": [
+    {
+      "id": "physical",
+      "name": "Physical",
+      "type": "Form",
+      "level": 1,
+      "pointCost": 1,
+      "effects": [{ "kind": "dice", "count": 1, "sides": 7, "damageType": "physical" }],
+      "description": "Invalid: d7 is not a supported die size."
+    },
+    {
+      "id": "range",
+      "name": "Range",
+      "type": "Modifier",
+      "level": 1,
+      "pointCost": 1,
+      "effects": [{ "kind": "range", "value": 3, "unit": "m" }],
+      "description": "Invalid: range must be expressed in ft."
+    }
+  ]
+}
