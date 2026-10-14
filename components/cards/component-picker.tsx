@@ -7,11 +7,13 @@ export function ComponentPicker({
   heading,
   entries,
   onAdd,
+  emptyMessage,
 }: {
   type: ComponentType
   heading: string
   entries: readonly CatalogueEntry[]
   onAdd: (id: string, type: ComponentType) => void
+  emptyMessage?: string
 }) {
   const headingId = `picker-${type.toLowerCase()}`
 
@@ -21,7 +23,7 @@ export function ComponentPicker({
         {heading}
       </h3>
       {entries.length === 0 ? (
-        <p className="leading-relaxed text-muted-foreground">{`No ${type}s in the catalogue yet.`}</p>
+        <p className="leading-relaxed text-muted-foreground">{emptyMessage ?? `No ${type}s in the catalogue yet.`}</p>
       ) : (
         <ul className="flex flex-wrap gap-3">
           {entries.map((entry) => (
@@ -38,7 +40,8 @@ export function ComponentPicker({
                     {entry.name}
                   </span>
                   <span className="text-sm opacity-80">
-                    {entry.effects.map(formatEffect).join(', ')} · {entry.cost} pts
+                    {entry.effects.map(formatEffect).join(', ')} · {entry.cost} pts · Lv {entry.level} ·{' '}
+                    {entry.alignment}
                   </span>
                 </span>
               </button>

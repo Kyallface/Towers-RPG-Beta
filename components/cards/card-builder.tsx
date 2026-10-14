@@ -7,7 +7,9 @@ import { saveCard } from '@/app/cards/actions'
 import { createCatalogue } from '@/lib/catalogue/catalogue'
 import type { CatalogueData, ComponentType } from '@/lib/catalogue/types'
 import { addComponent, EMPTY_DRAFT, removeOccurrence, type CardDraft, type DraftUpdate } from '@/lib/cards/draft'
+import { EMPTY_FILTERS, filterEntries, hasActiveFilters, type ComponentFilters } from '@/lib/cards/filter'
 import { resolveCard } from '@/lib/cards/resolve'
+import { ComponentFiltersBar } from './component-filters'
 import { MAX_CARD_NAME_LENGTH } from '@/lib/cards/saved'
 import { PixelButton } from '@/components/pixel-button'
 import { ComponentPicker } from './component-picker'
@@ -22,6 +24,11 @@ export function CardBuilder({ data }: { data: CatalogueData }) {
   const [name, setName] = useState('')
   const [notice, setNotice] = useState<string | null>(null)
   const [isSaving, startSaving] = useTransition()
+
+  const [filters, setFilters] = useState<ComponentFilters>(EMPTY_FILTERS)
+  const filtering = hasActiveFilters(filters)
+  const forms = useMemo(() => filterEntries(catalogue.list('Form'), filters), [catalogue, filters])
+  const modifiers = useMemo(() => filterEntries(catalogue.list('Modifier'), filters), [catalogue, filters])
 
   const resolution = useMemo(() => resolveCard(draft.componentIds, catalogue), [draft, catalogue])
   const canSave = resolution.status === 'resolved' && name.trim().length > 0 && !isSaving
@@ -52,12 +59,25 @@ export function CardBuilder({ data }: { data: CatalogueData }) {
   return (
     <div className="flex flex-col gap-8 lg:flex-row lg:items-start">
       <div className="flex flex-1 flex-col gap-8">
-        <ComponentPicker type="Form" heading="Add a Form" entries={catalogue.list('Form')} onAdd={handleAdd} />
+        <ComponentFiltersBar
+          filters={filters}
+          onChange={setFilters}
+          onClear={() => setFilters(EMPTY_FILTERS)}
+          resultCount={forms.length + modifiers.length}
+        />
+        <ComponentPicker
+          type="Form"
+          heading="Add a Form"
+          entries={forms}
+          onAdd={handleAdd}
+          emptyMessage={filtering ? 'No Forms match the current search.' : undefined}
+        />
         <ComponentPicker
           type="Modifier"
           heading="Add a Modifier"
-          entries={catalogue.list('Modifier')}
+          entries={modifiers}
           onAdd={handleAdd}
+          emptyMessage={filtering ? 'No Modifiers match the current search.' : undefined}
         />
         <DraftComponents
           componentIds={draft.componentIds}
