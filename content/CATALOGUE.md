@@ -5,8 +5,8 @@ The catalogue is a platform-neutral JSON list of reusable card components: **For
 | File | Purpose |
 | --- | --- |
 | `catalogue.json` | The catalogue the app loads (currently a small provisional test catalogue). |
-| `catalogue.schema.json` | Machine-readable JSON Schema (draft 2020-12): field types, required fields, numeric bounds, effect kinds and units. |
-| `examples/` | One valid and several invalid examples, used by the tests. |
+| `catalogue.schema.json` | Machine-readable JSON Schema (draft 2020-12): field types, required fields, numeric bounds and effect syntax. |
+| `../lib/catalogue/fixtures/` | One valid and several invalid examples, used by the tests. |
 
 ## Entry fields
 
@@ -15,20 +15,23 @@ The catalogue is a platform-neutral JSON list of reusable card components: **For
 | `id` | string | Required, unique within the catalogue, stable. Lowercase slug: `physical`, `long-range`. |
 | `name` | string | Required, 1-80 characters. |
 | `type` | `"Form"` or `"Modifier"` | Required, case-sensitive. |
-| `level` | integer | Required, 0-20. |
-| `pointCost` | integer | Required, 0-100. Cost of **one** occurrence on a card. |
-| `provisional` | boolean | Optional, default `false`. `true` means level and point cost are placeholders, not final balance. |
-| `effects` | array | Required, at least one effect (see below). |
+| `effect` | string | Required. One or more effects separated by commas, e.g. `"1d6 physical"` or `"2d8 fire, 30 ft range"` (see below). |
 | `description` | string | Required, 1-1000 characters. |
+| `level` | integer | Required, 0-20. |
+| `cost` | integer | Required, 0-100. Cost of **one** occurrence on a card. |
+| `alignment` | string | Required, 1-32 characters, e.g. `"PP"`. |
+| `provisional` | boolean | Optional, default `false`. `true` means level and cost are placeholders, not final balance. |
 
-The envelope is `{ "schemaVersion": 1, "entries": [...] }`. Readers must reject any `schemaVersion` they do not support. Unknown properties are rejected, so typos get caught.
+The envelope is `{ "schemaVersion": 2, "entries": [...] }`. Readers must reject any `schemaVersion` they do not support. Unknown properties are rejected, so typos get caught.
 
-## Effect kinds
+## Effect syntax
 
-| `kind` | Fields | Meaning |
+Case and extra spaces are ignored.
+
+| Form | Rules | Meaning |
 | --- | --- | --- |
-| `dice` | `count` (1-20), `sides` (4, 6, 8, 10, 12, 20), `damageType` (slug) | Adds `count`d`sides` of `damageType` per occurrence. |
-| `range` | `value` (1-1000), `unit` (`"ft"`) | Adds `value` feet of range per occurrence. |
+| `<count>d<sides> <damage type>` | count 1-20; sides 4, 6, 8, 10, 12 or 20; damage type a lowercase word | Adds `count`d`sides` of that damage type per occurrence. |
+| `<value> ft range` | value 1-1000; unit `ft` only | Adds `value` feet of range per occurrence. |
 
 ## Stacking contract (prototype)
 
@@ -38,9 +41,9 @@ Cards store a list of catalogue IDs. Duplicates are allowed and each occurrence 
 2. **Range** values add together, in feet.
 3. Different effect kinds are never merged.
 4. Unsupported combinations are reported as errors and never silently dropped. For example, `1d6 physical` + `1d8 physical` (same damage type, different die sizes) is unsupported.
-5. Total point cost is the sum of `pointCost` across every occurrence.
+5. Total cost is the sum of `cost` across every occurrence.
 
-Behaviour comes only from the structured effect data, never from the `id` or `name`.
+Behaviour comes only from the parsed `effect` data, never from the `id` or `name`.
 
 ### Acceptance example
 

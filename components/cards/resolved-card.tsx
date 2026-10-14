@@ -1,19 +1,31 @@
 import { formatEffect } from '@/lib/catalogue/format'
 import type { CardResolution } from '@/lib/cards/resolve'
 
-export function ResolvedCard({ resolution }: { resolution: CardResolution }) {
+export function ResolvedCard({
+  resolution,
+  title = 'Resolved card',
+  headingId = 'resolved-heading',
+  live = true,
+  footer,
+}: {
+  resolution: CardResolution
+  title?: string
+  headingId?: string
+  live?: boolean
+  footer?: React.ReactNode
+}) {
   return (
     <section
-      aria-labelledby="resolved-heading"
-      aria-live="polite"
+      aria-labelledby={headingId}
+      aria-live={live ? 'polite' : undefined}
       className="pixel-frame-raised m-[3px] flex flex-col bg-card text-card-foreground"
     >
       <header className="flex items-center justify-between gap-3 bg-primary px-5 py-3 text-primary-foreground">
-        <h3 id="resolved-heading" className="font-pixel text-xl">
-          Resolved card
+        <h3 id={headingId} className="font-pixel text-xl">
+          {title}
         </h3>
         {resolution.status === 'resolved' ? (
-          <span className="font-pixel text-lg">{resolution.totalPointCost} pts</span>
+          <span className="font-pixel text-lg">{resolution.totalCost} pts</span>
         ) : null}
       </header>
 
@@ -52,7 +64,7 @@ export function ResolvedCard({ resolution }: { resolution: CardResolution }) {
                     <span>
                       {entry.name} <span className="font-pixel text-muted-foreground">{`×${quantity}`}</span>
                     </span>
-                    <span className="font-pixel text-sm text-muted-foreground">{entry.pointCost * quantity} pts</span>
+                    <span className="font-pixel text-sm text-muted-foreground">{entry.cost * quantity} pts</span>
                   </li>
                 ))}
               </ul>
@@ -61,13 +73,14 @@ export function ResolvedCard({ resolution }: { resolution: CardResolution }) {
             <dl className="flex items-baseline justify-between gap-3 border-t-[3px] border-muted pt-4 font-pixel">
               <dt className="text-muted-foreground">Total cost</dt>
               <dd className="text-xl">
-                {resolution.totalPointCost} pts
+                {resolution.totalCost} pts
                 <span className="sr-only">{` across ${resolution.occurrences} components`}</span>
               </dd>
             </dl>
           </>
         )}
       </div>
+      {footer ? <footer className="flex flex-wrap gap-3 border-t-[3px] border-muted px-5 py-4">{footer}</footer> : null}
     </section>
   )
 }

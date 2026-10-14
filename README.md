@@ -13,4 +13,4 @@ pnpm build   # production build
 
 ## Card Catalogue
 
-Forms and Modifiers live in [`catalogue/catalogue.json`](catalogue/catalogue.json). See [`catalogue/README.md`](catalogue/README.md) for the schema, effect kinds and stacking rules. The app validates the catalogue before showing it on the Cards page, so edits to the JSON show up without any code changes.
+Forms and Modifiers live in [`content/catalogue.json`](content/catalogue.json). See [`catalogue/README.md`](catalogue/README.md) for the schema, effect kinds and stacking rules. The app validates the catalogue before showing it on the Cards page, so edits to the JSON show up without any code changes.

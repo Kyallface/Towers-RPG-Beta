@@ -19,7 +19,7 @@ export type CardResolution =
       readonly status: 'resolved'
       readonly components: readonly ResolvedComponent[]
       readonly effects: readonly Effect[]
-      readonly totalPointCost: number
+      readonly totalCost: number
       readonly occurrences: number
     }
   | { readonly status: 'error'; readonly errors: readonly ResolutionError[] }
@@ -39,7 +39,7 @@ export function resolveCard(componentIds: readonly string[], catalogue: Catalogu
   const quantities = new Map<string, { entry: CatalogueEntry; quantity: number }>()
   const dice = new Map<string, DiceTotal>()
   let rangeFeet: number | null = null
-  let totalPointCost = 0
+  let totalCost = 0
 
   componentIds.forEach((id, index) => {
     const position = index + 1
@@ -48,13 +48,13 @@ export function resolveCard(componentIds: readonly string[], catalogue: Catalogu
       errors.push({
         position,
         id,
-        message: `Position ${position}: "${id}" is not in the catalogue. Remove it from the card or add it to catalogue/catalogue.json.`,
+        message: `Position ${position}: "${id}" is not in the catalogue. Remove it from the card or add it to content/catalogue.json.`,
       })
       return
     }
 
     const { entry } = lookup
-    totalPointCost += entry.pointCost
+    totalCost += entry.cost
     const existing = quantities.get(id)
     quantities.set(id, { entry, quantity: (existing?.quantity ?? 0) + 1 })
 
@@ -99,7 +99,7 @@ export function resolveCard(componentIds: readonly string[], catalogue: Catalogu
     status: 'resolved',
     components: Array.from(quantities.values()),
     effects,
-    totalPointCost,
+    totalCost,
     occurrences: componentIds.length,
   }
 }

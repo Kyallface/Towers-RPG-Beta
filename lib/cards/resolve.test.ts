@@ -7,7 +7,7 @@ import type { CatalogueData, CatalogueEntry } from '../catalogue/types'
 import { removeOccurrence } from './draft'
 import { resolveCard, type CardResolution } from './resolve'
 
-const catalogueText = readFileSync(path.join(__dirname, '../../catalogue/catalogue.json'), 'utf8')
+const catalogueText = readFileSync(path.join(__dirname, '../../content/catalogue.json'), 'utf8')
 const parsed = parseCatalogue(catalogueText)
 if (parsed.status !== 'ready') throw new Error(parsed.message)
 const catalogue = parsed.catalogue
@@ -24,9 +24,11 @@ function entry(overrides: Partial<CatalogueEntry> & Pick<CatalogueEntry, 'id' | 
     name: overrides.id,
     type: 'Form',
     level: 1,
-    pointCost: 1,
+    cost: 1,
     provisional: true,
     description: 'Test entry.',
+    effect: 'test',
+    alignment: 'PP',
     ...overrides,
   }
 }
@@ -39,13 +41,13 @@ describe('resolveCard (#12)', () => {
   it('resolves a single component', () => {
     const result = resolved(resolveCard(['physical'], catalogue))
     expect(result.effects.map(formatEffect)).toEqual(['1d6 physical'])
-    expect(result.totalPointCost).toBe(1)
+    expect(result.totalCost).toBe(1)
   })
 
   it('resolves [physical, physical, range, range] to 2d6 physical and 20 ft range', () => {
     const result = resolved(resolveCard(STACK, catalogue))
     expect(result.effects.map(formatEffect)).toEqual(['2d6 physical', '20 ft range'])
-    expect(result.totalPointCost).toBe(4)
+    expect(result.totalCost).toBe(4)
     expect(result.occurrences).toBe(4)
     expect(result.components.map((c) => [c.entry.id, c.quantity])).toEqual([
       ['physical', 2],
@@ -58,7 +60,7 @@ describe('resolveCard (#12)', () => {
     if (!update.ok) throw new Error(update.message)
     const result = resolved(resolveCard(update.draft.componentIds, catalogue))
     expect(result.effects.map(formatEffect)).toEqual(['1d6 physical', '20 ft range'])
-    expect(result.totalPointCost).toBe(3)
+    expect(result.totalCost).toBe(3)
   })
 
   it('does not mutate its inputs', () => {
@@ -71,17 +73,17 @@ describe('resolveCard (#12)', () => {
 
   it('uses current catalogue values without rewriting card IDs', () => {
     const changed: CatalogueData = {
-      schemaVersion: 1,
+      schemaVersion: 2,
       entries: catalogue.data.entries.map((e) =>
         e.id === 'range'
-          ? { ...e, pointCost: 3, effects: [{ kind: 'range', value: 30, unit: 'ft' }] }
+          ? { ...e, cost: 3, effects: [{ kind: 'range', value: 30, unit: 'ft' }] }
           : e,
       ),
     }
     const ids = [...STACK]
     const result = resolved(resolveCard(ids, createCatalogue(changed)))
     expect(result.effects.map(formatEffect)).toEqual(['2d6 physical', '60 ft range'])
-    expect(result.totalPointCost).toBe(8)
+    expect(result.totalCost).toBe(8)
     expect(ids).toEqual(STACK)
   })
 
@@ -97,7 +99,7 @@ describe('resolveCard (#12)', () => {
 
   it('reports unsupported dice combinations', () => {
     const mixed = createCatalogue({
-      schemaVersion: 1,
+      schemaVersion: 2,
       entries: [
         entry({ id: 'd6', effects: [{ kind: 'dice', count: 1, sides: 6, damageType: 'physical' }] }),
         entry({ id: 'd8', effects: [{ kind: 'dice', count: 1, sides: 8, damageType: 'physical' }] }),
@@ -110,7 +112,7 @@ describe('resolveCard (#12)', () => {
 
   it('keeps different damage types and effect kinds separate', () => {
     const multi = createCatalogue({
-      schemaVersion: 1,
+      schemaVersion: 2,
       entries: [
         entry({ id: 'physical', effects: [{ kind: 'dice', count: 1, sides: 6, damageType: 'physical' }] }),
         entry({ id: 'fire', effects: [{ kind: 'dice', count: 1, sides: 8, damageType: 'fire' }] }),

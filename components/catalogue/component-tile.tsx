@@ -39,7 +39,11 @@ export function ComponentTile({ entry }: { entry: CatalogueEntry }) {
           </div>
           <div className="flex gap-2">
             <dt className="text-muted-foreground">Cost</dt>
-            <dd>{entry.pointCost} pts</dd>
+            <dd>{entry.cost} pts</dd>
+          </div>
+          <div className="flex gap-2">
+            <dt className="text-muted-foreground">Alignment</dt>
+            <dd>{entry.alignment}</dd>
           </div>
         </dl>
         {entry.provisional ? (

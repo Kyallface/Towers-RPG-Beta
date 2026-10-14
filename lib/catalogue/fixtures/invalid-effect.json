@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 2,
+  "entries": [
+    {
+      "id": "physical",
+      "name": "Physical",
+      "type": "Form",
+      "effect": "1d7 physical",
+      "description": "Invalid: d7 is not a supported die size.",
+      "level": 1,
+      "cost": 1,
+      "alignment": "PP"
+    },
+    {
+      "id": "range",
+      "name": "Range",
+      "type": "Modifier",
+      "effect": "3 m range",
+      "description": "Invalid: range must be expressed in ft.",
+      "level": 1,
+      "cost": 1,
+      "alignment": "PP"
+    }
+  ]
+}

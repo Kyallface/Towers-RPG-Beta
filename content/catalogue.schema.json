@@ -1,0 +1,77 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://towers-rpg/catalogue.schema.json",
+  "title": "Towers RPG Card Catalogue",
+  "description": "Platform-neutral list of card components (Forms and Modifiers). See CATALOGUE.md for effect syntax and stacking rules.",
+  "type": "object",
+  "required": ["schemaVersion", "entries"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "schemaVersion": { "const": 2 },
+    "entries": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/entry" }
+    }
+  },
+  "$defs": {
+    "entry": {
+      "type": "object",
+      "required": ["id", "name", "type", "effect", "description", "level", "cost", "alignment"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9]*(-[a-z0-9]+)*$",
+          "maxLength": 64,
+          "description": "Stable, unique lowercase slug. Saved cards refer to components by this id."
+        },
+        "name": { "type": "string", "minLength": 1, "maxLength": 80 },
+        "type": { "enum": ["Form", "Modifier"] },
+        "effect": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200,
+          "pattern": "^\\s*(\\d+d\\d+ [a-z][a-z0-9-]*|\\d+ ft range)(\\s*,\\s*(\\d+d\\d+ [a-z][a-z0-9-]*|\\d+ ft range))*\\s*$",
+          "description": "One or more effects separated by commas, e.g. \"1d6 physical\" or \"2d8 fire, 30 ft range\"."
+        },
+        "description": { "type": "string", "minLength": 1, "maxLength": 1000 },
+        "level": { "type": "integer", "minimum": 0, "maximum": 20 },
+        "cost": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Points for one occurrence on a card."
+        },
+        "alignment": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 32,
+          "description": "Alignment code, e.g. \"PP\"."
+        },
+        "provisional": {
+          "type": "boolean",
+          "default": false,
+          "description": "True when level and cost are placeholder values, not final balance."
+        }
+      }
+    }
+  },
+  "examples": [
+    {
+      "schemaVersion": 2,
+      "entries": [
+        {
+          "id": "physical",
+          "name": "Physical",
+          "type": "Form",
+          "effect": "1d6 physical",
+          "description": "Channels raw force into the card.",
+          "level": 1,
+          "cost": 1,
+          "alignment": "PP"
+        }
+      ]
+    }
+  ]
+}

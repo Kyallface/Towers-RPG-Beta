@@ -3,7 +3,7 @@ import path from 'node:path'
 import { cache } from 'react'
 import { parseCatalogue, type CatalogueLoadResult } from './catalogue'
 
-const CATALOGUE_PATH = path.join(process.cwd(), 'catalogue', 'catalogue.json')
+const CATALOGUE_PATH = path.join(process.cwd(), 'content', 'catalogue.json')
 
 /** Server-only: reads the repository catalogue once per request and validates it before exposing it. */
 export const loadCatalogue = cache(async (): Promise<CatalogueLoadResult> => {
@@ -14,7 +14,7 @@ export const loadCatalogue = cache(async (): Promise<CatalogueLoadResult> => {
     return {
       status: 'error',
       reason: 'unavailable',
-      message: 'The catalogue file could not be read. Expected it at catalogue/catalogue.json.',
+      message: 'The catalogue file could not be read. Expected it at content/catalogue.json.',
       issues: [],
     }
   }

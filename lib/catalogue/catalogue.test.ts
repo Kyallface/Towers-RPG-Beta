@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest'
 import { parseCatalogue } from './catalogue'
 import { formatEffect } from './format'
 
-const catalogueText = readFileSync(path.join(__dirname, '../../catalogue/catalogue.json'), 'utf8')
+const catalogueText = readFileSync(path.join(__dirname, '../../content/catalogue.json'), 'utf8')
 
 function readyCatalogue() {
   const result = parseCatalogue(catalogueText)
@@ -23,7 +23,7 @@ describe('parseCatalogue', () => {
   })
 
   it('reports validation failures with issues', () => {
-    const result = parseCatalogue(JSON.stringify({ schemaVersion: 1, entries: [{ id: 'x' }] }))
+    const result = parseCatalogue(JSON.stringify({ schemaVersion: 2, entries: [{ id: 'x' }] }))
     expect(result.status).toBe('error')
     if (result.status === 'error') {
       expect(result.reason).toBe('invalid')

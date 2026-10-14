@@ -33,7 +33,7 @@ export function addComponent(
     return {
       ok: false,
       draft,
-      message: `"${id}" is not in the catalogue, so it was not added. Check catalogue/catalogue.json.`,
+      message: `"${id}" is not in the catalogue, so it was not added. Check content/catalogue.json.`,
     }
   }
   if (lookup.entry.type !== expectedType) {

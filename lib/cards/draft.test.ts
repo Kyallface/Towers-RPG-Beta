@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest'
 import { parseCatalogue } from '../catalogue/catalogue'
 import { addComponent, EMPTY_DRAFT, groupQuantities, removeOccurrence, removeOneOf, type CardDraft } from './draft'
 
-const catalogueText = readFileSync(path.join(__dirname, '../../catalogue/catalogue.json'), 'utf8')
+const catalogueText = readFileSync(path.join(__dirname, '../../content/catalogue.json'), 'utf8')
 const result = parseCatalogue(catalogueText)
 if (result.status !== 'ready') throw new Error(result.message)
 const catalogue = result.catalogue

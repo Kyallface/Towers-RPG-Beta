@@ -1,4 +1,4 @@
-export const CATALOGUE_SCHEMA_VERSION = 1
+export const CATALOGUE_SCHEMA_VERSION = 2
 
 export const COMPONENT_TYPES = ['Form', 'Modifier'] as const
 export type ComponentType = (typeof COMPONENT_TYPES)[number]
@@ -30,11 +30,15 @@ export type CatalogueEntry = {
   readonly id: string
   readonly name: string
   readonly type: ComponentType
-  readonly level: number
-  readonly pointCost: number
-  readonly provisional: boolean
+  /** The effect text exactly as written in the catalogue, e.g. "1d6 physical". */
+  readonly effect: string
+  /** Structured effects parsed from `effect`; the resolver only ever reads these. */
   readonly effects: readonly Effect[]
   readonly description: string
+  readonly level: number
+  readonly cost: number
+  readonly alignment: string
+  readonly provisional: boolean
 }
 
 export type CatalogueData = {
@@ -43,7 +47,7 @@ export type CatalogueData = {
 }
 
 export type CatalogueIssue = {
-  /** JSON path to the offending value, e.g. `$.entries[1].effects[0].sides`. */
+  /** JSON path to the offending value, e.g. `$.entries[1].effect`. */
   readonly path: string
   /** Entry id when known, otherwise `#<index>`; null for envelope-level issues. */
   readonly entry: string | null

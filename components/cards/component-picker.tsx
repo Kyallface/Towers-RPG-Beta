@@ -38,7 +38,7 @@ export function ComponentPicker({
                     {entry.name}
                   </span>
                   <span className="text-sm opacity-80">
-                    {entry.effects.map(formatEffect).join(', ')} · {entry.pointCost} pts
+                    {entry.effects.map(formatEffect).join(', ')} · {entry.cost} pts
                   </span>
                 </span>
               </button>
