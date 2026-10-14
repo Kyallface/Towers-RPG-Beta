@@ -4,12 +4,14 @@ import type { CardResolution } from '@/lib/cards/resolve'
 export function ResolvedCard({
   resolution,
   title = 'Resolved card',
+  description,
   headingId = 'resolved-heading',
   live = true,
   footer,
 }: {
   resolution: CardResolution
   title?: string
+  description?: string
   headingId?: string
   live?: boolean
   footer?: React.ReactNode
@@ -30,6 +32,12 @@ export function ResolvedCard({
       </header>
 
       <div className="pixel-grid flex flex-col gap-5 p-5">
+        {description ? (
+          <div className="flex flex-col gap-2 border-b-[3px] border-muted pb-4">
+            <h4 className="font-pixel text-xs uppercase tracking-widest text-muted-foreground">Description</h4>
+            <p className="whitespace-pre-line text-pretty leading-relaxed">{description}</p>
+          </div>
+        ) : null}
         {resolution.status === 'empty' ? (
           <p className="leading-relaxed text-muted-foreground">
             This card is empty. Add components to see its combined effects and cost.

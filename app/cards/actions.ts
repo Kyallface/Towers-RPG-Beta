@@ -8,12 +8,12 @@ import { readSavedCards, writeSavedCards } from '@/lib/cards/saved-store'
 
 export type ActionResult = { ok: true } | { ok: false; message: string }
 
-export async function saveCard(name: string, componentIds: string[]): Promise<ActionResult> {
+export async function saveCard(name: string, description: string, componentIds: string[]): Promise<ActionResult> {
   const catalogue = await loadCatalogue()
   if (catalogue.status === 'error') return { ok: false, message: 'The catalogue failed to load, so the card was not saved.' }
 
   const knownIds = new Set(catalogue.catalogue.data.entries.map((entry) => entry.id))
-  const input = validateCardInput(name, componentIds, knownIds)
+  const input = validateCardInput(name, description, componentIds, knownIds)
   if (!input.ok) return input
 
   const current = await readSavedCards()
@@ -24,7 +24,13 @@ export async function saveCard(name: string, componentIds: string[]): Promise<Ac
       schemaVersion: SAVED_CARDS_SCHEMA_VERSION,
       cards: [
         ...current.file.cards,
-        { id: randomUUID(), name: input.name, componentIds: input.componentIds, savedAt: new Date().toISOString() },
+        {
+          id: randomUUID(),
+          name: input.name,
+          ...(input.description ? { description: input.description } : {}),
+          componentIds: input.componentIds,
+          savedAt: new Date().toISOString(),
+        },
       ],
     })
   } catch {

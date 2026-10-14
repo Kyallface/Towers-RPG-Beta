@@ -44,6 +44,7 @@ export async function SavedCards() {
             <ResolvedCard
               resolution={resolveCard(card.componentIds, catalogue)}
               title={card.name}
+              description={card.description}
               headingId={`saved-${card.id}`}
               live={false}
               footer={<DeleteCardButton id={card.id} name={card.name} />}

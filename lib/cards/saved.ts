@@ -7,6 +7,7 @@ export const SAVED_CARDS_SCHEMA_VERSION = 1
 export type SavedCard = {
   readonly id: string
   readonly name: string
+  readonly description?: string
   readonly componentIds: readonly string[]
   readonly savedAt: string
 }
@@ -18,7 +19,8 @@ export type SavedCardsFile = {
 
 export const EMPTY_SAVED_CARDS: SavedCardsFile = { schemaVersion: SAVED_CARDS_SCHEMA_VERSION, cards: [] }
 
-export const MAX_CARD_NAME_LENGTH = 60
+export const MAX_CARD_NAME_LENGTH = 30
+export const MAX_CARD_DESCRIPTION_LENGTH = 500
 export const MAX_CARD_COMPONENTS = 50
 
 export type ParseSavedCardsResult =
@@ -35,6 +37,7 @@ function isSavedCard(value: unknown): value is SavedCard {
     typeof value.id === 'string' &&
     value.id.length > 0 &&
     typeof value.name === 'string' &&
+    (value.description === undefined || typeof value.description === 'string') &&
     typeof value.savedAt === 'string' &&
     Array.isArray(value.componentIds) &&
     value.componentIds.every((id) => typeof id === 'string')
@@ -65,15 +68,32 @@ export function parseSavedCards(text: string): ParseSavedCardsResult {
 }
 
 export type CardInputResult =
-  | { readonly ok: true; readonly name: string; readonly componentIds: readonly string[] }
+  | {
+      readonly ok: true
+      readonly name: string
+      readonly description: string
+      readonly componentIds: readonly string[]
+    }
   | { readonly ok: false; readonly message: string }
 
 /** Validates untrusted save input. `knownIds` comes from the current catalogue. */
-export function validateCardInput(name: unknown, componentIds: unknown, knownIds: ReadonlySet<string>): CardInputResult {
+export function validateCardInput(
+  name: unknown,
+  description: unknown,
+  componentIds: unknown,
+  knownIds: ReadonlySet<string>,
+): CardInputResult {
   const trimmed = typeof name === 'string' ? name.trim() : ''
   if (trimmed.length === 0) return { ok: false, message: 'Give the card a name before saving.' }
   if (trimmed.length > MAX_CARD_NAME_LENGTH) {
     return { ok: false, message: `Card names can be at most ${MAX_CARD_NAME_LENGTH} characters.` }
+  }
+  if (description !== undefined && typeof description !== 'string') {
+    return { ok: false, message: 'The card description is malformed.' }
+  }
+  const trimmedDescription = (description ?? '').trim()
+  if (trimmedDescription.length > MAX_CARD_DESCRIPTION_LENGTH) {
+    return { ok: false, message: `Descriptions can be at most ${MAX_CARD_DESCRIPTION_LENGTH} characters.` }
   }
   if (!Array.isArray(componentIds) || !componentIds.every((id) => typeof id === 'string')) {
     return { ok: false, message: 'The card data is malformed.' }
@@ -84,5 +104,5 @@ export function validateCardInput(name: unknown, componentIds: unknown, knownIds
   }
   const unknown = componentIds.find((id) => !knownIds.has(id))
   if (unknown) return { ok: false, message: `"${unknown}" is not in the catalogue, so the card was not saved.` }
-  return { ok: true, name: trimmed, componentIds: [...componentIds] }
+  return { ok: true, name: trimmed, description: trimmedDescription, componentIds: [...componentIds] }
 }

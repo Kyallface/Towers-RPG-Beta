@@ -10,7 +10,7 @@ import { addComponent, EMPTY_DRAFT, removeOccurrence, type CardDraft, type Draft
 import { EMPTY_FILTERS, filterEntries, hasActiveFilters, type ComponentFilters } from '@/lib/cards/filter'
 import { resolveCard } from '@/lib/cards/resolve'
 import { ComponentFiltersBar } from './component-filters'
-import { MAX_CARD_NAME_LENGTH } from '@/lib/cards/saved'
+import { MAX_CARD_DESCRIPTION_LENGTH, MAX_CARD_NAME_LENGTH } from '@/lib/cards/saved'
 import { PixelButton } from '@/components/pixel-button'
 import { ComponentPicker } from './component-picker'
 import { DraftComponents } from './draft-components'
@@ -20,8 +20,10 @@ export function CardBuilder({ data }: { data: CatalogueData }) {
   const catalogue = useMemo(() => createCatalogue(data), [data])
   const router = useRouter()
   const nameId = useId()
+  const descriptionId = useId()
   const [draft, setDraft] = useState<CardDraft>(EMPTY_DRAFT)
   const [name, setName] = useState('')
+  const [description, setDescription] = useState('')
   const [notice, setNotice] = useState<string | null>(null)
   const [isSaving, startSaving] = useTransition()
 
@@ -43,11 +45,12 @@ export function CardBuilder({ data }: { data: CatalogueData }) {
   const handleClear = () => {
     apply({ ok: true, draft: EMPTY_DRAFT })
     setName('')
+    setDescription('')
   }
 
   function handleSave() {
     startSaving(async () => {
-      const result = await saveCard(name, [...draft.componentIds])
+      const result = await saveCard(name, description, [...draft.componentIds])
       if (!result.ok) {
         setNotice(result.message)
         return
@@ -65,6 +68,49 @@ export function CardBuilder({ data }: { data: CatalogueData }) {
           onClear={() => setFilters(EMPTY_FILTERS)}
           resultCount={forms.length + modifiers.length}
         />
+        <fieldset className="flex flex-col gap-4">
+          <legend className="sr-only">Card details</legend>
+          <div className="flex flex-col gap-2">
+            <div className="flex items-baseline justify-between gap-3">
+              <label htmlFor={nameId} className="font-pixel text-sm uppercase tracking-widest text-muted-foreground">
+                Card name
+              </label>
+              <span className="font-pixel text-xs text-muted-foreground" aria-hidden="true">
+                {`${name.length}/${MAX_CARD_NAME_LENGTH}`}
+              </span>
+            </div>
+            <input
+              id={nameId}
+              value={name}
+              maxLength={MAX_CARD_NAME_LENGTH}
+              onChange={(event) => setName(event.target.value)}
+              placeholder="e.g. Ember Lance"
+              className="pixel-frame m-[3px] bg-muted px-3 py-2 font-pixel text-lg text-foreground placeholder:text-muted-foreground focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-ring"
+            />
+          </div>
+          <div className="flex flex-col gap-2">
+            <div className="flex items-baseline justify-between gap-3">
+              <label
+                htmlFor={descriptionId}
+                className="font-pixel text-sm uppercase tracking-widest text-muted-foreground"
+              >
+                Description
+              </label>
+              <span className="font-pixel text-xs text-muted-foreground" aria-hidden="true">
+                {`${description.length}/${MAX_CARD_DESCRIPTION_LENGTH}`}
+              </span>
+            </div>
+            <textarea
+              id={descriptionId}
+              value={description}
+              maxLength={MAX_CARD_DESCRIPTION_LENGTH}
+              onChange={(event) => setDescription(event.target.value)}
+              rows={3}
+              placeholder="Optional flavour text or notes for this card"
+              className="pixel-frame m-[3px] resize-y bg-muted px-3 py-2 leading-relaxed text-foreground placeholder:text-muted-foreground focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-ring"
+            />
+          </div>
+        </fieldset>
         <ComponentPicker
           type="Form"
           heading="Add a Form"
@@ -88,20 +134,6 @@ export function CardBuilder({ data }: { data: CatalogueData }) {
       </div>
 
       <div className="flex flex-col gap-4 lg:sticky lg:top-6 lg:w-96">
-        <div className="flex flex-col gap-2">
-          <label htmlFor={nameId} className="font-pixel text-sm uppercase tracking-widest text-muted-foreground">
-            Card name
-          </label>
-          <input
-            id={nameId}
-            value={name}
-            maxLength={MAX_CARD_NAME_LENGTH}
-            onChange={(event) => setName(event.target.value)}
-            placeholder="e.g. Ember Lance"
-            className="pixel-frame m-[3px] bg-muted px-3 py-2 font-pixel text-lg text-foreground placeholder:text-muted-foreground focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-ring"
-          />
-        </div>
-
         <div className="flex flex-wrap gap-2">
           <PixelButton type="button" onClick={handleSave} disabled={!canSave} className="flex-1">
             <Save aria-hidden="true" className="size-5" />
@@ -111,7 +143,7 @@ export function CardBuilder({ data }: { data: CatalogueData }) {
             type="button"
             variant="secondary"
             onClick={handleClear}
-            disabled={draft.componentIds.length === 0 && name.length === 0}
+            disabled={draft.componentIds.length === 0 && name.length === 0 && description.length === 0}
           >
             <Eraser aria-hidden="true" className="size-5" />
             Clear
@@ -126,7 +158,11 @@ export function CardBuilder({ data }: { data: CatalogueData }) {
           {notice}
         </p>
 
-        <ResolvedCard resolution={resolution} title={name.trim() || 'Resolved card'} />
+        <ResolvedCard
+          resolution={resolution}
+          title={name.trim() || 'Resolved card'}
+          description={description.trim() || undefined}
+        />
       </div>
     </div>
   )

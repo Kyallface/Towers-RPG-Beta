@@ -5,26 +5,42 @@ const known = new Set(['physical', 'long-range'])
 
 describe('validateCardInput', () => {
   it('accepts a named card with known components, keeping duplicates', () => {
-    const result = validateCardInput('  Ember Lance ', ['physical', 'physical', 'long-range'], known)
-    expect(result).toEqual({ ok: true, name: 'Ember Lance', componentIds: ['physical', 'physical', 'long-range'] })
+    const result = validateCardInput('  Ember Lance ', ' A burning spear. ', ['physical', 'physical', 'long-range'], known)
+    expect(result).toEqual({
+      ok: true,
+      name: 'Ember Lance',
+      description: 'A burning spear.',
+      componentIds: ['physical', 'physical', 'long-range'],
+    })
+  })
+
+  it('treats the description as optional', () => {
+    const result = validateCardInput('A', undefined, ['physical'], known)
+    expect(result).toMatchObject({ ok: true, description: '' })
+  })
+
+  it('rejects names over 30 characters and overlong descriptions', () => {
+    expect(validateCardInput('x'.repeat(31), '', ['physical'], known).ok).toBe(false)
+    expect(validateCardInput('A', 'x'.repeat(501), ['physical'], known).ok).toBe(false)
+    expect(validateCardInput('A', 42, ['physical'], known).ok).toBe(false)
   })
 
   it('rejects a blank name', () => {
-    expect(validateCardInput('   ', ['physical'], known).ok).toBe(false)
+    expect(validateCardInput('   ', '', ['physical'], known).ok).toBe(false)
   })
 
   it('rejects an empty card', () => {
-    expect(validateCardInput('A', [], known).ok).toBe(false)
+    expect(validateCardInput('A', '', [], known).ok).toBe(false)
   })
 
   it('rejects unknown component IDs', () => {
-    const result = validateCardInput('A', ['physical', 'nope'], known)
+    const result = validateCardInput('A', '', ['physical', 'nope'], known)
     expect(result).toEqual({ ok: false, message: expect.stringContaining('"nope"') })
   })
 
   it('rejects malformed component lists', () => {
-    expect(validateCardInput('A', 'physical', known).ok).toBe(false)
-    expect(validateCardInput('A', [1], known).ok).toBe(false)
+    expect(validateCardInput('A', '', 'physical', known).ok).toBe(false)
+    expect(validateCardInput('A', '', [1], known).ok).toBe(false)
   })
 })
 
