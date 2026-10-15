@@ -1,0 +1,30 @@
+{
+  "$schema": "./catalogue.schema.json",
+  "schemaVersion": 2,
+  "entries": [
+    {
+      "id": "physical",
+      "name": "Physical",
+      "type": "Form",
+      "effect": "1d6 physical",
+      "description": "Channels raw force into the card. Each Physical adds one d6 of physical damage.",
+      "level": 1,
+      "cost": 1,
+      "alignment": "Phy",
+      "requirement": "Phy1",
+      "provisional": true
+    },
+    {
+      "id": "range",
+      "name": "Range",
+      "type": "Modifier",
+      "effect": "10 ft range",
+      "description": "Extends the card's reach. Each Range adds 10 feet.",
+      "level": 1,
+      "cost": 1,
+      "alignment": "Pow",
+      "requirement": "Fin1",
+      "provisional": true
+    }
+  ]
+}

@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://towers-rpg/catalogue.schema.json",
+  "title": "Towers RPG Card Catalogue",
+  "description": "Platform-neutral list of card components (Forms and Modifiers). See CATALOGUE.md for effect syntax and stacking rules.",
+  "type": "object",
+  "required": ["schemaVersion", "entries"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "schemaVersion": { "const": 2 },
+    "entries": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/entry" }
+    }
+  },
+  "$defs": {
+    "entry": {
+      "type": "object",
+      "required": ["id", "name", "type", "effect", "description", "level", "cost", "alignment", "requirement"],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": { "properties": { "type": { "const": "Form" } } },
+          "then": { "properties": { "requirement": { "pattern": "^(Phy|Int|Emo)(10|[1-9])$" } } }
+        },
+        {
+          "if": { "properties": { "type": { "const": "Modifier" } } },
+          "then": { "properties": { "requirement": { "pattern": "^(Pow|Fin)(10|[1-9])$" } } }
+        }
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9]*(-[a-z0-9]+)*$",
+          "maxLength": 64,
+          "description": "Stable, unique lowercase slug. Saved cards refer to components by this id."
+        },
+        "name": { "type": "string", "minLength": 1, "maxLength": 80 },
+        "type": { "enum": ["Form", "Modifier"] },
+        "effect": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200,
+          "pattern": "^\\s*(\\d+d\\d+ [a-z][a-z0-9-]*|\\d+ ft range)(\\s*,\\s*(\\d+d\\d+ [a-z][a-z0-9-]*|\\d+ ft range))*\\s*$",
+          "description": "One or more effects separated by commas, e.g. \"1d6 physical\" or \"2d8 fire, 30 ft range\"."
+        },
+        "description": { "type": "string", "minLength": 1, "maxLength": 1000 },
+        "level": { "type": "integer", "minimum": 0, "maximum": 20 },
+        "cost": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Points for one occurrence on a card."
+        },
+        "alignment": {
+          "type": "string",
+          "enum": ["Phy", "Int", "Emo", "Pow", "Fin"],
+          "description": "Forms use Phy, Int or Emo; Modifiers use Pow or Fin."
+        },
+        "requirement": {
+          "type": "string",
+          "pattern": "^(Phy|Int|Emo|Pow|Fin)(10|[1-9])$",
+          "description": "Requirement (REQ): a stat and a value 1-10. Forms use Phy, Int or Emo (e.g. \"Phy1\", \"Emo8\"); Modifiers use Pow or Fin (e.g. \"Pow3\", \"Fin1\")."
+        },
+        "provisional": {
+          "type": "boolean",
+          "default": false,
+          "description": "True when level and cost are placeholder values, not final balance."
+        }
+      }
+    }
+  },
+  "examples": [
+    {
+      "schemaVersion": 2,
+      "entries": [
+        {
+          "id": "physical",
+          "name": "Physical",
+          "type": "Form",
+          "effect": "1d6 physical",
+          "description": "Channels raw force into the card.",
+          "level": 1,
+          "cost": 1,
+          "alignment": "Phy",
+          "requirement": "Phy1"
+        }
+      ]
+    }
+  ]
+}

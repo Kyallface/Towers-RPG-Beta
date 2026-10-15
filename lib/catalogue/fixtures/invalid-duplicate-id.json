@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 2,
+  "entries": [
+    {
+      "id": "physical",
+      "name": "Physical",
+      "type": "Form",
+      "effect": "1d6 physical",
+      "description": "First entry.",
+      "level": 1,
+      "cost": 1,
+      "alignment": "Phy",
+      "requirement": "Phy1"
+    },
+    {
+      "id": "physical",
+      "name": "Physical Again",
+      "type": "Form",
+      "effect": "1d6 physical",
+      "description": "Invalid: catalogue ids must be unique.",
+      "level": 1,
+      "cost": 1,
+      "alignment": "Phy",
+      "requirement": "Phy1"
+    }
+  ]
+}

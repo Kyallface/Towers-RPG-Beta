@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 2,
+  "entries": [
+    {
+      "id": "fire-bolt",
+      "name": "Fire Bolt",
+      "type": "Form",
+      "effect": "2d8 fire, 30 ft range",
+      "description": "Example entry with two effects. provisional is optional and defaults to false.",
+      "level": 2,
+      "cost": 3,
+      "alignment": "Emo",
+      "requirement": "Emo2"
+    }
+  ]
+}
