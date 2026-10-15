@@ -48,6 +48,39 @@ describe('filterEntries', () => {
     expect(filterEntries(entries, { ...EMPTY_FILTERS, cost: 'abc' })).toHaveLength(0)
   })
 
+  describe('requirement filters', () => {
+    const mixed = [
+      entry({ id: 'f-p1', type: 'Form', requirement: { stat: 'P', value: 1 } }),
+      entry({ id: 'f-e3', type: 'Form', requirement: { stat: 'E', value: 3 } }),
+      entry({ id: 'm-p1', type: 'Modifier', requirement: { stat: 'P', value: 1 } }),
+      entry({ id: 'm-f2', type: 'Modifier', requirement: { stat: 'F', value: 2 } }),
+    ]
+
+    it('Form REQ filters only Forms', () => {
+      expect(ids(filterEntries(mixed, { ...EMPTY_FILTERS, formReqStat: 'E', formReqValue: '3' }))).toEqual([
+        'f-e3',
+        'm-p1',
+        'm-f2',
+      ])
+    })
+
+    it('Mod REQ filters only Modifiers', () => {
+      expect(ids(filterEntries(mixed, { ...EMPTY_FILTERS, modReqStat: 'F' }))).toEqual(['f-p1', 'f-e3', 'm-f2'])
+    })
+
+    it('matches on number alone', () => {
+      expect(ids(filterEntries(mixed, { ...EMPTY_FILTERS, formReqValue: '1', modReqValue: '2' }))).toEqual([
+        'f-p1',
+        'm-f2',
+      ])
+    })
+
+    it('counts as an active filter and clears with EMPTY_FILTERS', () => {
+      expect(hasActiveFilters({ ...EMPTY_FILTERS, modReqStat: 'P' })).toBe(true)
+      expect(filterEntries(mixed, EMPTY_FILTERS)).toHaveLength(4)
+    })
+  })
+
   it('combines filters', () => {
     const filters = { ...EMPTY_FILTERS, level: '1', alignment: 'FP' }
     expect(ids(filterEntries(entries, filters))).toEqual(['swift-strike'])

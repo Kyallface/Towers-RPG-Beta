@@ -1,4 +1,4 @@
-import type { CatalogueEntry } from '@/lib/catalogue/types'
+import type { CatalogueEntry, Requirement } from '@/lib/catalogue/types'
 
 export const ALIGNMENTS = [
   { code: 'PP', label: 'Power Physical' },
@@ -14,9 +14,28 @@ export type ComponentFilters = {
   readonly name: string
   readonly level: string
   readonly cost: string
+  readonly formReqStat: string
+  readonly formReqValue: string
+  readonly modReqStat: string
+  readonly modReqValue: string
 }
 
-export const EMPTY_FILTERS: ComponentFilters = { alignment: '', name: '', level: '', cost: '' }
+export const EMPTY_FILTERS: ComponentFilters = {
+  alignment: '',
+  name: '',
+  level: '',
+  cost: '',
+  formReqStat: '',
+  formReqValue: '',
+  modReqStat: '',
+  modReqValue: '',
+}
+
+function matchesRequirement(requirement: Requirement, stat: string, value: string): boolean {
+  const wantedStat = stat.trim().toUpperCase()
+  if (wantedStat !== '' && requirement.stat !== wantedStat) return false
+  return matchesNumber(requirement.value, value)
+}
 
 export function hasActiveFilters(filters: ComponentFilters): boolean {
   return Object.values(filters).some((value) => value.trim() !== '')
@@ -36,7 +55,11 @@ export function matchesFilters(entry: CatalogueEntry, filters: ComponentFilters)
   const name = filters.name.trim().toLowerCase()
   if (name !== '' && !entry.name.toLowerCase().includes(name)) return false
 
-  return matchesNumber(entry.level, filters.level) && matchesNumber(entry.cost, filters.cost)
+  if (!matchesNumber(entry.level, filters.level) || !matchesNumber(entry.cost, filters.cost)) return false
+
+  return entry.type === 'Form'
+    ? matchesRequirement(entry.requirement, filters.formReqStat, filters.formReqValue)
+    : matchesRequirement(entry.requirement, filters.modReqStat, filters.modReqValue)
 }
 
 export function filterEntries(entries: readonly CatalogueEntry[], filters: ComponentFilters): CatalogueEntry[] {
