@@ -13,6 +13,11 @@ export function formatRequirement(requirement: Requirement): string {
   return `${requirement.stat}${requirement.value}`
 }
 
+/** e.g. ["Phy", "Fin"] -> "Phy-Fin". */
+export function formatAlignment(alignment: readonly string[]): string {
+  return alignment.join('-')
+}
+
 export function formatRequirements(requirements: readonly Requirement[]): string {
   return requirements.map(formatRequirement).join(' ')
 }

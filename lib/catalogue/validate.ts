@@ -4,13 +4,15 @@ import {
   COMPONENT_TYPES,
   REQUIREMENT_MAX,
   REQUIREMENT_MIN,
-  REQUIREMENT_STATS_BY_TYPE,
+  LEGACY_STAT_LETTERS,
+  STATS,
+  STATS_BY_TYPE,
   type CatalogueData,
   type CatalogueEntry,
   type CatalogueIssue,
   type ComponentType,
   type Requirement,
-  type RequirementStat,
+  type Stat,
 } from './types'
 
 export type ValidationResult =
@@ -36,7 +38,8 @@ const ENTRY_KEYS = [
   'provisional',
 ]
 
-const REQUIREMENT_PATTERN = /^([a-z])\s*(\d+)$/i
+const REQUIREMENT_PATTERN = /^([a-z]{1,3})\s*(\d+)$/i
+const ALIGNMENT_PATTERN = /^[a-z]{1,3}$/i
 
 const isObject = (value: unknown): value is JsonObject =>
   typeof value === 'object' && value !== null && !Array.isArray(value)
@@ -111,37 +114,66 @@ function checkOneOf<T>(value: unknown, allowed: readonly T[], path: string, repo
   return true
 }
 
+const typeOf = (type: unknown): ComponentType | null =>
+  COMPONENT_TYPES.includes(type as ComponentType) ? (type as ComponentType) : null
+
 /**
- * Parses a requirement such as "P1" or "E8". The allowed stats depend on the entry type,
+ * Normalises a stat token to its canonical label ("phy" -> "Phy"). Legacy single letters
+ * are mapped by component type, so "P" is Phy on a Form and Pow on a Modifier.
+ */
+function normaliseStat(token: string, type: ComponentType | null): string {
+  const trimmed = token.trim()
+  if (trimmed.length === 1) {
+    return type ? (LEGACY_STAT_LETTERS[type][trimmed.toUpperCase()] ?? trimmed.toUpperCase()) : trimmed.toUpperCase()
+  }
+  return trimmed.charAt(0).toUpperCase() + trimmed.slice(1).toLowerCase()
+}
+
+function checkStat(stat: string, type: ComponentType | null, field: string, path: string, report: Reporter): Stat | null {
+  const allowed = type ? STATS_BY_TYPE[type] : STATS
+  if (!allowed.includes(stat as Stat)) {
+    const subject = type ? `A ${type} ${field}` : `${field.charAt(0).toUpperCase()}${field.slice(1)}`
+    report.add(path, `${subject} must be one of ${allowed.join(', ')}; got "${stat}".`)
+    return null
+  }
+  return stat as Stat
+}
+
+/** Parses an alignment such as "Phy" (Forms) or "Fin" (Modifiers). */
+function checkAlignment(value: unknown, rawType: unknown, path: string, report: Reporter): Stat | null {
+  const type = typeOf(rawType)
+  if (typeof value !== 'string' || !ALIGNMENT_PATTERN.test(value.trim())) {
+    const example = type ? STATS_BY_TYPE[type][0] : 'Phy'
+    report.add(path, `Expected an alignment such as "${example}"; got ${describe(value)}.`)
+    return null
+  }
+  return checkStat(normaliseStat(value, type), type, 'alignment', path, report)
+}
+
+/**
+ * Parses a requirement such as "Phy1" or "Fin8". The allowed stats depend on the entry type,
  * so when the type itself is invalid only the general shape is checked.
  */
-function checkRequirement(value: unknown, type: unknown, path: string, report: Reporter): Requirement | null {
-  const allowed = COMPONENT_TYPES.includes(type as ComponentType)
-    ? REQUIREMENT_STATS_BY_TYPE[type as ComponentType]
-    : null
-  const example = allowed ? `${allowed[0]}1` : 'P1'
+function checkRequirement(value: unknown, rawType: unknown, path: string, report: Reporter): Requirement | null {
+  const type = typeOf(rawType)
+  const example = type ? `${STATS_BY_TYPE[type][0]}1` : 'Phy1'
   const range = `${REQUIREMENT_MIN}-${REQUIREMENT_MAX}`
 
   const match = typeof value === 'string' ? REQUIREMENT_PATTERN.exec(value.trim()) : null
   if (!match) {
-    report.add(path, `Expected a requirement such as "${example}" (a stat letter and a number ${range}); got ${describe(value)}.`)
+    report.add(path, `Expected a requirement such as "${example}" (a stat and a number ${range}); got ${describe(value)}.`)
     return null
   }
 
-  const stat = match[1].toUpperCase() as RequirementStat
+  const stat = checkStat(normaliseStat(match[1], type), type, 'requirement', path, report)
   const amount = Number(match[2])
-  let ok = true
-
-  if (allowed && !allowed.includes(stat)) {
-    report.add(path, `A ${type} requirement must use ${allowed.join(', ')}; got "${stat}".`)
-    ok = false
-  }
+  let ok = stat !== null
   if (amount < REQUIREMENT_MIN || amount > REQUIREMENT_MAX) {
     report.add(path, `Requirement value must be ${range}; got ${amount}.`)
     ok = false
   }
 
-  return ok && allowed ? { stat, value: amount } : null
+  return ok && type && stat ? { stat, value: amount } : null
 }
 
 function validateEntry(raw: unknown, index: number, parent: Reporter): CatalogueEntry | null {
@@ -163,7 +195,7 @@ function validateEntry(raw: unknown, index: number, parent: Reporter): Catalogue
   checkText(raw.description, `${path}.description`, 1000, report)
   checkInteger(raw.level, `${path}.level`, 0, 20, report)
   checkInteger(raw.cost, `${path}.cost`, 0, 100, report)
-  checkText(raw.alignment, `${path}.alignment`, 32, report)
+  const alignment = checkAlignment(raw.alignment, raw.type, `${path}.alignment`, report)
   const requirement = checkRequirement(raw.requirement, raw.type, `${path}.requirement`, report)
 
   if (raw.provisional !== undefined && typeof raw.provisional !== 'boolean') {
@@ -175,7 +207,7 @@ function validateEntry(raw: unknown, index: number, parent: Reporter): Catalogue
     for (const error of parsed.errors) report.add(`${path}.effect`, error)
   }
 
-  if (parent.issues.length > issuesBefore || !parsed?.ok || !requirement) return null
+  if (parent.issues.length > issuesBefore || !parsed?.ok || !requirement || !alignment) return null
 
   return Object.freeze({
     id: raw.id as string,
@@ -186,7 +218,7 @@ function validateEntry(raw: unknown, index: number, parent: Reporter): Catalogue
     description: raw.description as string,
     level: raw.level as number,
     cost: raw.cost as number,
-    alignment: (raw.alignment as string).trim(),
+    alignment,
     requirement: Object.freeze(requirement),
     provisional: (raw.provisional as boolean | undefined) ?? false,
   })

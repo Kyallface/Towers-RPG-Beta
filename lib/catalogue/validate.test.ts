@@ -15,8 +15,8 @@ const physical = () => ({
   description: 'A strike.',
   level: 1,
   cost: 1,
-  alignment: 'PP',
-  requirement: 'P1',
+  alignment: 'Phy',
+  requirement: 'Phy1',
 })
 
 const withEntry = (entry: unknown) => ({ schemaVersion: 2, entries: [entry] })
@@ -38,8 +38,8 @@ describe('validateCatalogue: valid fixtures', () => {
       effect: '1d6 physical',
       level: 1,
       cost: 1,
-      alignment: 'PP',
-      requirement: { stat: 'P', value: 1 },
+      alignment: 'Phy',
+      requirement: { stat: 'Phy', value: 1 },
       effects: [{ kind: 'dice', count: 1, sides: 6, damageType: 'physical' }],
     })
     expect(result.data.entries.every((e) => e.provisional)).toBe(true)
@@ -137,34 +137,61 @@ describe('validateCatalogue: focused failures', () => {
   })
 
   it.each([
-    ['Form', 'P1', 'P', 1],
-    ['Form', 'I4', 'I', 4],
-    ['Form', 'e8', 'E', 8],
-    ['Modifier', 'P3', 'P', 3],
-    ['Modifier', ' F10 ', 'F', 10],
+    ['Form', 'Phy1', 'Phy', 1],
+    ['Form', 'int4', 'Int', 4],
+    ['Form', 'EMO8', 'Emo', 8],
+    ['Modifier', 'Pow3', 'Pow', 3],
+    ['Modifier', ' Fin10 ', 'Fin', 10],
+    ['Form', 'P1', 'Phy', 1],
+    ['Modifier', 'P3', 'Pow', 3],
+    ['Modifier', 'F2', 'Fin', 2],
   ])('accepts a %s requirement of %j', (type, requirement, stat, value) => {
-    const result = validateCatalogue(withEntry({ ...physical(), type, requirement }))
+    const alignment = type === 'Form' ? 'Phy' : 'Pow'
+    const result = validateCatalogue(withEntry({ ...physical(), type, alignment, requirement }))
     expect(result.ok).toBe(true)
     if (!result.ok) return
     expect(result.data.entries[0].requirement).toEqual({ stat, value })
   })
 
   it.each([
-    ['Form', 'F1', 'must use P, I, E'],
-    ['Modifier', 'I2', 'must use P, F'],
-    ['Modifier', 'E2', 'must use P, F'],
-    ['Form', 'P0', 'must be 1-10'],
-    ['Form', 'P11', 'must be 1-10'],
-    ['Form', 'P', 'Expected a requirement'],
+    ['Form', 'Fin1', 'must be one of Phy, Int, Emo'],
+    ['Modifier', 'Int2', 'must be one of Pow, Fin'],
+    ['Modifier', 'E2', 'must be one of Pow, Fin'],
+    ['Form', 'Phy0', 'must be 1-10'],
+    ['Form', 'Phy11', 'must be 1-10'],
+    ['Form', 'Phy', 'Expected a requirement'],
     ['Form', 3, 'Expected a requirement'],
   ])('rejects a %s requirement of %j', (type, requirement, message) => {
-    const issues = issuesFor(withEntry({ ...physical(), type, requirement }))
+    const alignment = type === 'Form' ? 'Phy' : 'Pow'
+    const issues = issuesFor(withEntry({ ...physical(), type, alignment, requirement }))
     expect(issues[0].path).toBe('$.entries[0].requirement')
     expect(issues[0].message).toContain(message)
   })
 
   it('rejects an empty alignment', () => {
     expect(issuesFor(withEntry({ ...physical(), alignment: ' ' }))[0].path).toBe('$.entries[0].alignment')
+  })
+
+  it.each([
+    ['Form', 'Pow', 'must be one of Phy, Int, Emo'],
+    ['Modifier', 'Phy', 'must be one of Pow, Fin'],
+  ])('rejects a %s alignment of %j', (type, alignment, message) => {
+    const requirement = type === 'Form' ? 'Phy1' : 'Pow1'
+    const [issue] = issuesFor(withEntry({ ...physical(), type, alignment, requirement }))
+    expect(issue.path).toBe('$.entries[0].alignment')
+    expect(issue.message).toContain(message)
+  })
+
+  it.each([
+    ['Form', 'P', 'Phy'],
+    ['Form', 'emo', 'Emo'],
+    ['Modifier', 'P', 'Pow'],
+    ['Modifier', 'F', 'Fin'],
+  ])('normalises a %s alignment of %j to %s', (type, alignment, expected) => {
+    const requirement = type === 'Form' ? 'Phy1' : 'Pow1'
+    const result = validateCatalogue(withEntry({ ...physical(), type, alignment, requirement }))
+    if (!result.ok) throw new Error(JSON.stringify(result.issues))
+    expect(result.data.entries[0].alignment).toBe(expected)
   })
 
   it('rejects unrecognised effect text with guidance', () => {

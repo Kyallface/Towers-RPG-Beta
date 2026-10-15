@@ -19,8 +19,10 @@ The catalogue is a platform-neutral JSON list of reusable card components: **For
 | `description` | string | Required, 1-1000 characters. |
 | `level` | integer | Required, 0-20. |
 | `cost` | integer | Required, 0-100. Cost of **one** occurrence on a card. |
-| `alignment` | string | Required, 1-32 characters, e.g. `"PP"`. |
-| `requirement` | string | Required. Requirement (shown as **REQ**): a stat letter followed by a value 1-10. Forms use `P`, `I` or `E` (e.g. `"P1"`, `"E8"`); Modifiers use `P` or `F` (e.g. `"P3"`, `"F5"`). On a resolved card, REQ is the highest value for each stat across its components. |
+| `alignment` | string | Required. Forms use `Phy`, `Int` or `Emo`; Modifiers use `Pow` or `Fin` (e.g. Physical is `"Phy"`, Range is `"Pow"`). A resolved card shows its unique alignments, Form first then Mod, e.g. `Phy-Pow`. |
+| `requirement` | string | Required. Requirement (shown as **REQ**): a stat followed by a value 1-10. Forms use `Phy`, `Int` or `Emo` (e.g. `"Phy1"`, `"Emo8"`); Modifiers use `Pow` or `Fin` (e.g. `"Pow3"`, `"Fin1"`). On a resolved card, REQ is the highest value for each stat across its components. |
+
+Every alignment pairs a Form stat with a Mod stat: Phy-Pow, Phy-Fin, Int-Pow, Int-Fin, Emo-Pow, Emo-Fin. Legacy single letters are still accepted and mapped by type: on a Form `P`/`I`/`E` become `Phy`/`Int`/`Emo`; on a Modifier `P`/`F` become `Pow`/`Fin`.
 | `provisional` | boolean | Optional, default `false`. `true` means level and cost are placeholders, not final balance. |
 
 The envelope is `{ "schemaVersion": 2, "entries": [...] }`. Readers must reject any `schemaVersion` they do not support. Unknown properties are rejected, so typos get caught.

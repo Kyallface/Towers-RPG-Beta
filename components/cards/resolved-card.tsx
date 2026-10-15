@@ -1,4 +1,5 @@
-import { formatEffect, formatRequirement } from '@/lib/catalogue/format'
+import { formatAlignment, formatEffect, formatRequirement } from '@/lib/catalogue/format'
+import { STAT_LABELS } from '@/lib/catalogue/types'
 import type { CardResolution } from '@/lib/cards/resolve'
 
 export function ResolvedCard({
@@ -62,6 +63,13 @@ export function ResolvedCard({
                   </li>
                 ))}
               </ul>
+            </div>
+
+            <div className="flex flex-col gap-2 border-t-[3px] border-muted pt-4">
+              <h4 className="font-pixel text-xs uppercase tracking-widest text-muted-foreground">Alignment</h4>
+              <p className="font-pixel text-2xl text-primary" aria-label={`Alignment ${resolution.alignment.map((stat) => STAT_LABELS[stat]).join(' ')}`}>
+                {formatAlignment(resolution.alignment)}
+              </p>
             </div>
 
             <div className="flex flex-col gap-2 border-t-[3px] border-muted pt-4">

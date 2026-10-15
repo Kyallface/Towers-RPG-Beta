@@ -9,8 +9,8 @@
       "description": "First entry.",
       "level": 1,
       "cost": 1,
-      "alignment": "PP",
-      "requirement": "P1"
+      "alignment": "Phy",
+      "requirement": "Phy1"
     },
     {
       "id": "physical",
@@ -20,8 +20,8 @@
       "description": "Invalid: catalogue ids must be unique.",
       "level": 1,
       "cost": 1,
-      "alignment": "PP",
-      "requirement": "P1"
+      "alignment": "Phy",
+      "requirement": "Phy1"
     }
   ]
 }

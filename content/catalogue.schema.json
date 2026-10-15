@@ -55,14 +55,13 @@
         },
         "alignment": {
           "type": "string",
-          "minLength": 1,
-          "maxLength": 32,
-          "description": "Alignment code, e.g. \"PP\"."
+          "enum": ["Phy", "Int", "Emo", "Pow", "Fin"],
+          "description": "Forms use Phy, Int or Emo; Modifiers use Pow or Fin."
         },
         "requirement": {
           "type": "string",
-          "pattern": "^[PIEF](10|[1-9])$",
-          "description": "Requirement (REQ): a stat letter and a value 1-10. Forms use P, I or E (e.g. \"P1\", \"E8\"); Modifiers use P or F (e.g. \"P3\", \"F5\")."
+          "pattern": "^(Phy|Int|Emo|Pow|Fin)(10|[1-9])$",
+          "description": "Requirement (REQ): a stat and a value 1-10. Forms use Phy, Int or Emo (e.g. \"Phy1\", \"Emo8\"); Modifiers use Pow or Fin (e.g. \"Pow3\", \"Fin1\")."
         },
         "provisional": {
           "type": "boolean",
@@ -84,8 +83,8 @@
           "description": "Channels raw force into the card.",
           "level": 1,
           "cost": 1,
-          "alignment": "PP",
-          "requirement": "P1"
+          "alignment": "Phy",
+          "requirement": "Phy1"
         }
       ]
     }

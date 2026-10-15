@@ -11,19 +11,43 @@ export type RangeUnit = (typeof RANGE_UNITS)[number]
 
 export const EFFECT_KINDS = ['dice', 'range'] as const
 
-/** Display order for requirement stats on a resolved card. */
-export const REQUIREMENT_STATS = ['P', 'I', 'E', 'F'] as const
-export type RequirementStat = (typeof REQUIREMENT_STATS)[number]
+/**
+ * Every alignment pairs a Form stat (Phy, Int, Emo) with a Mod stat (Pow, Fin).
+ * Forms use the first column and Modifiers the second; this is also the display order.
+ */
+export const FORM_STATS = ['Phy', 'Int', 'Emo'] as const
+export const MOD_STATS = ['Pow', 'Fin'] as const
+export const STATS = [...FORM_STATS, ...MOD_STATS] as const
+export type Stat = (typeof STATS)[number]
+export type RequirementStat = Stat
 
-export const REQUIREMENT_STATS_BY_TYPE: Readonly<Record<ComponentType, readonly RequirementStat[]>> = {
-  Form: ['P', 'I', 'E'],
-  Modifier: ['P', 'F'],
+export const STAT_LABELS: Readonly<Record<Stat, string>> = {
+  Phy: 'Physical',
+  Int: 'Intellectual',
+  Emo: 'Emotional',
+  Pow: 'Power',
+  Fin: 'Finesse',
+}
+
+/** Display order for requirement stats on a resolved card. */
+export const REQUIREMENT_STATS: readonly Stat[] = STATS
+
+export const STATS_BY_TYPE: Readonly<Record<ComponentType, readonly Stat[]>> = {
+  Form: FORM_STATS,
+  Modifier: MOD_STATS,
+}
+export const REQUIREMENT_STATS_BY_TYPE = STATS_BY_TYPE
+
+/** Older catalogues used single letters; "P" means Phy on a Form but Pow on a Modifier. */
+export const LEGACY_STAT_LETTERS: Readonly<Record<ComponentType, Readonly<Record<string, Stat>>>> = {
+  Form: { P: 'Phy', I: 'Int', E: 'Emo' },
+  Modifier: { P: 'Pow', F: 'Fin' },
 }
 
 export const REQUIREMENT_MIN = 1
 export const REQUIREMENT_MAX = 10
 
-/** Requirement ("REQ"), written in the catalogue as e.g. "P1" or "E8". */
+/** Requirement ("REQ"), written in the catalogue as e.g. "Phy1" or "Fin2". */
 export type Requirement = {
   readonly stat: RequirementStat
   readonly value: number
@@ -55,7 +79,8 @@ export type CatalogueEntry = {
   readonly description: string
   readonly level: number
   readonly cost: number
-  readonly alignment: string
+  /** Phy, Int or Emo for Forms; Pow or Fin for Modifiers. */
+  readonly alignment: Stat
   readonly requirement: Requirement
   readonly provisional: boolean
 }

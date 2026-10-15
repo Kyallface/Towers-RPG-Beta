@@ -12,17 +12,17 @@ function entry(overrides: Partial<CatalogueEntry>): CatalogueEntry {
     description: 'd',
     level: 1,
     cost: 1,
-    alignment: 'PP',
-    requirement: { stat: 'P', value: 1 },
+    alignment: 'Phy',
+    requirement: { stat: 'Phy', value: 1 },
     provisional: false,
     ...overrides,
   }
 }
 
 const entries = [
-  entry({ id: 'physical', name: 'Physical', alignment: 'PP', level: 1, cost: 1 }),
-  entry({ id: 'mind-spike', name: 'Mind Spike', alignment: 'PI', level: 2, cost: 3 }),
-  entry({ id: 'swift-strike', name: 'Swift Strike', alignment: 'FP', level: 1, cost: 2 }),
+  entry({ id: 'physical', name: 'Physical', alignment: 'Phy', level: 1, cost: 1 }),
+  entry({ id: 'mind-spike', name: 'Mind Spike', alignment: 'Int', level: 2, cost: 3 }),
+  entry({ id: 'swift-strike', name: 'Swift Strike', alignment: 'Fin', type: 'Modifier', level: 1, cost: 2 }),
 ]
 
 const ids = (list: CatalogueEntry[]) => list.map((e) => e.id)
@@ -34,8 +34,8 @@ describe('filterEntries', () => {
   })
 
   it('filters by alignment code, not description', () => {
-    expect(ids(filterEntries(entries, { ...EMPTY_FILTERS, alignment: 'PI' }))).toEqual(['mind-spike'])
-    expect(filterEntries(entries, { ...EMPTY_FILTERS, alignment: 'Power Intellectual' })).toHaveLength(0)
+    expect(ids(filterEntries(entries, { ...EMPTY_FILTERS, alignment: 'int' }))).toEqual(['mind-spike'])
+    expect(filterEntries(entries, { ...EMPTY_FILTERS, alignment: 'Intellectual' })).toHaveLength(0)
   })
 
   it('searches name case-insensitively by substring', () => {
@@ -50,14 +50,14 @@ describe('filterEntries', () => {
 
   describe('requirement filters', () => {
     const mixed = [
-      entry({ id: 'f-p1', type: 'Form', requirement: { stat: 'P', value: 1 } }),
-      entry({ id: 'f-e3', type: 'Form', requirement: { stat: 'E', value: 3 } }),
-      entry({ id: 'm-p1', type: 'Modifier', requirement: { stat: 'P', value: 1 } }),
-      entry({ id: 'm-f2', type: 'Modifier', requirement: { stat: 'F', value: 2 } }),
+      entry({ id: 'f-p1', type: 'Form', requirement: { stat: 'Phy', value: 1 } }),
+      entry({ id: 'f-e3', type: 'Form', requirement: { stat: 'Emo', value: 3 } }),
+      entry({ id: 'm-p1', type: 'Modifier', requirement: { stat: 'Pow', value: 1 } }),
+      entry({ id: 'm-f2', type: 'Modifier', requirement: { stat: 'Fin', value: 2 } }),
     ]
 
     it('Form REQ filters only Forms', () => {
-      expect(ids(filterEntries(mixed, { ...EMPTY_FILTERS, formReqStat: 'E', formReqValue: '3' }))).toEqual([
+      expect(ids(filterEntries(mixed, { ...EMPTY_FILTERS, formReqStat: 'Emo', formReqValue: '3' }))).toEqual([
         'f-e3',
         'm-p1',
         'm-f2',
@@ -65,7 +65,7 @@ describe('filterEntries', () => {
     })
 
     it('Mod REQ filters only Modifiers', () => {
-      expect(ids(filterEntries(mixed, { ...EMPTY_FILTERS, modReqStat: 'F' }))).toEqual(['f-p1', 'f-e3', 'm-f2'])
+      expect(ids(filterEntries(mixed, { ...EMPTY_FILTERS, modReqStat: 'Fin' }))).toEqual(['f-p1', 'f-e3', 'm-f2'])
     })
 
     it('matches on number alone', () => {
@@ -76,13 +76,13 @@ describe('filterEntries', () => {
     })
 
     it('counts as an active filter and clears with EMPTY_FILTERS', () => {
-      expect(hasActiveFilters({ ...EMPTY_FILTERS, modReqStat: 'P' })).toBe(true)
+      expect(hasActiveFilters({ ...EMPTY_FILTERS, modReqStat: 'Pow' })).toBe(true)
       expect(filterEntries(mixed, EMPTY_FILTERS)).toHaveLength(4)
     })
   })
 
   it('combines filters', () => {
-    const filters = { ...EMPTY_FILTERS, level: '1', alignment: 'FP' }
+    const filters = { ...EMPTY_FILTERS, level: '1', alignment: 'Fin' }
     expect(ids(filterEntries(entries, filters))).toEqual(['swift-strike'])
     expect(hasActiveFilters(filters)).toBe(true)
   })

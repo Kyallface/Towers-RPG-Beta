@@ -10,8 +10,8 @@
       "description": "Channels raw force into the card. Each Physical adds one d6 of physical damage.",
       "level": 1,
       "cost": 1,
-      "alignment": "PP",
-      "requirement": "P1",
+      "alignment": "Phy",
+      "requirement": "Phy1",
       "provisional": true
     },
     {
@@ -22,8 +22,8 @@
       "description": "Extends the card's reach. Each Range adds 10 feet.",
       "level": 1,
       "cost": 1,
-      "alignment": "PP",
-      "requirement": "F1",
+      "alignment": "Pow",
+      "requirement": "Fin1",
       "provisional": true
     }
   ]

@@ -9,8 +9,8 @@
       "description": "Example entry with two effects. provisional is optional and defaults to false.",
       "level": 2,
       "cost": 3,
-      "alignment": "FF",
-      "requirement": "E2"
+      "alignment": "Emo",
+      "requirement": "Emo2"
     }
   ]
 }

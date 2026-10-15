@@ -1,6 +1,8 @@
 import type { Catalogue } from '../catalogue/catalogue'
 import {
   REQUIREMENT_STATS,
+  STATS,
+  type Stat,
   type CatalogueEntry,
   type DieSides,
   type Effect,
@@ -26,8 +28,10 @@ export type CardResolution =
       readonly status: 'resolved'
       readonly components: readonly ResolvedComponent[]
       readonly effects: readonly Effect[]
-      /** Highest requirement per stat across all components, in P, I, E, F order. */
+      /** Highest requirement per stat across all components, in Phy, Int, Emo, Pow, Fin order. */
       readonly requirements: readonly Requirement[]
+      /** Unique component alignments, Form stats first then Mod stats, e.g. ["Phy", "Fin"]. */
+      readonly alignment: readonly Stat[]
       readonly totalCost: number
       readonly occurrences: number
     }
@@ -48,6 +52,7 @@ export function resolveCard(componentIds: readonly string[], catalogue: Catalogu
   const quantities = new Map<string, { entry: CatalogueEntry; quantity: number }>()
   const dice = new Map<string, DiceTotal>()
   const highestRequirement = new Map<RequirementStat, number>()
+  const alignments = new Set<Stat>()
   let rangeFeet: number | null = null
   let totalCost = 0
 
@@ -70,6 +75,7 @@ export function resolveCard(componentIds: readonly string[], catalogue: Catalogu
 
     const { stat, value } = entry.requirement
     highestRequirement.set(stat, Math.max(highestRequirement.get(stat) ?? 0, value))
+    alignments.add(entry.alignment)
 
     for (const effect of entry.effects) {
       switch (effect.kind) {
@@ -116,6 +122,7 @@ export function resolveCard(componentIds: readonly string[], catalogue: Catalogu
       const value = highestRequirement.get(stat)
       return value === undefined ? [] : [{ stat, value }]
     }),
+    alignment: STATS.filter((stat) => alignments.has(stat)),
     totalCost,
     occurrences: componentIds.length,
   }

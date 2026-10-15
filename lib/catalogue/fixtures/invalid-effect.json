@@ -9,8 +9,8 @@
       "description": "Invalid: d7 is not a supported die size.",
       "level": 1,
       "cost": 1,
-      "alignment": "PP",
-      "requirement": "P1"
+      "alignment": "Phy",
+      "requirement": "Phy1"
     },
     {
       "id": "range",
@@ -20,8 +20,8 @@
       "description": "Invalid: range must be expressed in ft.",
       "level": 1,
       "cost": 1,
-      "alignment": "PP",
-      "requirement": "F1"
+      "alignment": "Pow",
+      "requirement": "Fin1"
     }
   ]
 }

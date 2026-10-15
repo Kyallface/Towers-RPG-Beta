@@ -1,13 +1,6 @@
-import type { CatalogueEntry, Requirement } from '@/lib/catalogue/types'
+import { STAT_LABELS, STATS, type CatalogueEntry, type Requirement } from '@/lib/catalogue/types'
 
-export const ALIGNMENTS = [
-  { code: 'PP', label: 'Power Physical' },
-  { code: 'PI', label: 'Power Intellectual' },
-  { code: 'PE', label: 'Power Emotional' },
-  { code: 'FP', label: 'Finesse Physical' },
-  { code: 'FI', label: 'Finesse Intellectual' },
-  { code: 'FE', label: 'Finesse Emotional' },
-] as const
+export const ALIGNMENTS = STATS.map((code) => ({ code, label: STAT_LABELS[code] }))
 
 export type ComponentFilters = {
   readonly alignment: string
@@ -33,7 +26,7 @@ export const EMPTY_FILTERS: ComponentFilters = {
 
 function matchesRequirement(requirement: Requirement, stat: string, value: string): boolean {
   const wantedStat = stat.trim().toUpperCase()
-  if (wantedStat !== '' && requirement.stat !== wantedStat) return false
+  if (wantedStat !== '' && requirement.stat.toUpperCase() !== wantedStat) return false
   return matchesNumber(requirement.value, value)
 }
 
