@@ -13,6 +13,7 @@ function entry(overrides: Partial<CatalogueEntry>): CatalogueEntry {
     level: 1,
     cost: 1,
     alignment: 'PP',
+    requirement: { stat: 'P', value: 1 },
     provisional: false,
     ...overrides,
   }

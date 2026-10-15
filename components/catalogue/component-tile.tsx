@@ -1,4 +1,4 @@
-import { formatEffect } from '@/lib/catalogue/format'
+import { formatEffect, formatRequirement } from '@/lib/catalogue/format'
 import type { CatalogueEntry } from '@/lib/catalogue/types'
 
 const TYPE_BADGE = {
@@ -44,6 +44,12 @@ export function ComponentTile({ entry }: { entry: CatalogueEntry }) {
           <div className="flex gap-2">
             <dt className="text-muted-foreground">Alignment</dt>
             <dd>{entry.alignment}</dd>
+          </div>
+          <div className="flex gap-2">
+            <dt className="text-muted-foreground">
+              <abbr title="Requirement">REQ</abbr>
+            </dt>
+            <dd>{formatRequirement(entry.requirement)}</dd>
           </div>
         </dl>
         {entry.provisional ? (

@@ -20,6 +20,7 @@ The catalogue is a platform-neutral JSON list of reusable card components: **For
 | `level` | integer | Required, 0-20. |
 | `cost` | integer | Required, 0-100. Cost of **one** occurrence on a card. |
 | `alignment` | string | Required, 1-32 characters, e.g. `"PP"`. |
+| `requirement` | string | Required. Requirement (shown as **REQ**): a stat letter followed by a value 1-10. Forms use `P`, `I` or `E` (e.g. `"P1"`, `"E8"`); Modifiers use `P` or `F` (e.g. `"P3"`, `"F5"`). On a resolved card, REQ is the highest value for each stat across its components. |
 | `provisional` | boolean | Optional, default `false`. `true` means level and cost are placeholders, not final balance. |
 
 The envelope is `{ "schemaVersion": 2, "entries": [...] }`. Readers must reject any `schemaVersion` they do not support. Unknown properties are rejected, so typos get caught.

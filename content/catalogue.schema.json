@@ -17,8 +17,18 @@
   "$defs": {
     "entry": {
       "type": "object",
-      "required": ["id", "name", "type", "effect", "description", "level", "cost", "alignment"],
+      "required": ["id", "name", "type", "effect", "description", "level", "cost", "alignment", "requirement"],
       "additionalProperties": false,
+      "allOf": [
+        {
+          "if": { "properties": { "type": { "const": "Form" } } },
+          "then": { "properties": { "requirement": { "pattern": "^[PIE](10|[1-9])$" } } }
+        },
+        {
+          "if": { "properties": { "type": { "const": "Modifier" } } },
+          "then": { "properties": { "requirement": { "pattern": "^[PF](10|[1-9])$" } } }
+        }
+      ],
       "properties": {
         "id": {
           "type": "string",
@@ -49,6 +59,11 @@
           "maxLength": 32,
           "description": "Alignment code, e.g. \"PP\"."
         },
+        "requirement": {
+          "type": "string",
+          "pattern": "^[PIEF](10|[1-9])$",
+          "description": "Requirement (REQ): a stat letter and a value 1-10. Forms use P, I or E (e.g. \"P1\", \"E8\"); Modifiers use P or F (e.g. \"P3\", \"F5\")."
+        },
         "provisional": {
           "type": "boolean",
           "default": false,
@@ -69,7 +84,8 @@
           "description": "Channels raw force into the card.",
           "level": 1,
           "cost": 1,
-          "alignment": "PP"
+          "alignment": "PP",
+          "requirement": "P1"
         }
       ]
     }

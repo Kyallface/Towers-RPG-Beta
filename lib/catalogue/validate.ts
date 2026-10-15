@@ -2,10 +2,15 @@ import { parseEffectText } from './effect-text'
 import {
   CATALOGUE_SCHEMA_VERSION,
   COMPONENT_TYPES,
+  REQUIREMENT_MAX,
+  REQUIREMENT_MIN,
+  REQUIREMENT_STATS_BY_TYPE,
   type CatalogueData,
   type CatalogueEntry,
   type CatalogueIssue,
   type ComponentType,
+  type Requirement,
+  type RequirementStat,
 } from './types'
 
 export type ValidationResult =
@@ -18,7 +23,20 @@ const SLUG_PATTERN = /^[a-z][a-z0-9]*(-[a-z0-9]+)*$/
 const SLUG_MAX = 64
 
 const ENVELOPE_KEYS = ['$schema', 'schemaVersion', 'entries']
-const ENTRY_KEYS = ['id', 'name', 'type', 'effect', 'description', 'level', 'cost', 'alignment', 'provisional']
+const ENTRY_KEYS = [
+  'id',
+  'name',
+  'type',
+  'effect',
+  'description',
+  'level',
+  'cost',
+  'alignment',
+  'requirement',
+  'provisional',
+]
+
+const REQUIREMENT_PATTERN = /^([a-z])\s*(\d+)$/i
 
 const isObject = (value: unknown): value is JsonObject =>
   typeof value === 'object' && value !== null && !Array.isArray(value)
@@ -93,6 +111,39 @@ function checkOneOf<T>(value: unknown, allowed: readonly T[], path: string, repo
   return true
 }
 
+/**
+ * Parses a requirement such as "P1" or "E8". The allowed stats depend on the entry type,
+ * so when the type itself is invalid only the general shape is checked.
+ */
+function checkRequirement(value: unknown, type: unknown, path: string, report: Reporter): Requirement | null {
+  const allowed = COMPONENT_TYPES.includes(type as ComponentType)
+    ? REQUIREMENT_STATS_BY_TYPE[type as ComponentType]
+    : null
+  const example = allowed ? `${allowed[0]}1` : 'P1'
+  const range = `${REQUIREMENT_MIN}-${REQUIREMENT_MAX}`
+
+  const match = typeof value === 'string' ? REQUIREMENT_PATTERN.exec(value.trim()) : null
+  if (!match) {
+    report.add(path, `Expected a requirement such as "${example}" (a stat letter and a number ${range}); got ${describe(value)}.`)
+    return null
+  }
+
+  const stat = match[1].toUpperCase() as RequirementStat
+  const amount = Number(match[2])
+  let ok = true
+
+  if (allowed && !allowed.includes(stat)) {
+    report.add(path, `A ${type} requirement must use ${allowed.join(', ')}; got "${stat}".`)
+    ok = false
+  }
+  if (amount < REQUIREMENT_MIN || amount > REQUIREMENT_MAX) {
+    report.add(path, `Requirement value must be ${range}; got ${amount}.`)
+    ok = false
+  }
+
+  return ok && allowed ? { stat, value: amount } : null
+}
+
 function validateEntry(raw: unknown, index: number, parent: Reporter): CatalogueEntry | null {
   const path = `$.entries[${index}]`
   const label = isObject(raw) && typeof raw.id === 'string' && raw.id.trim() ? raw.id : `#${index}`
@@ -113,6 +164,7 @@ function validateEntry(raw: unknown, index: number, parent: Reporter): Catalogue
   checkInteger(raw.level, `${path}.level`, 0, 20, report)
   checkInteger(raw.cost, `${path}.cost`, 0, 100, report)
   checkText(raw.alignment, `${path}.alignment`, 32, report)
+  const requirement = checkRequirement(raw.requirement, raw.type, `${path}.requirement`, report)
 
   if (raw.provisional !== undefined && typeof raw.provisional !== 'boolean') {
     report.add(`${path}.provisional`, `Expected true or false; got ${describe(raw.provisional)}.`)
@@ -123,7 +175,7 @@ function validateEntry(raw: unknown, index: number, parent: Reporter): Catalogue
     for (const error of parsed.errors) report.add(`${path}.effect`, error)
   }
 
-  if (parent.issues.length > issuesBefore || !parsed?.ok) return null
+  if (parent.issues.length > issuesBefore || !parsed?.ok || !requirement) return null
 
   return Object.freeze({
     id: raw.id as string,
@@ -135,6 +187,7 @@ function validateEntry(raw: unknown, index: number, parent: Reporter): Catalogue
     level: raw.level as number,
     cost: raw.cost as number,
     alignment: (raw.alignment as string).trim(),
+    requirement: Object.freeze(requirement),
     provisional: (raw.provisional as boolean | undefined) ?? false,
   })
 }

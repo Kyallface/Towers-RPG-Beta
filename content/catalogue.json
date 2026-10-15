@@ -11,6 +11,7 @@
       "level": 1,
       "cost": 1,
       "alignment": "PP",
+      "requirement": "P1",
       "provisional": true
     },
     {
@@ -22,6 +23,7 @@
       "level": 1,
       "cost": 1,
       "alignment": "PP",
+      "requirement": "F1",
       "provisional": true
     }
   ]

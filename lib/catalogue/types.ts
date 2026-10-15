@@ -11,6 +11,24 @@ export type RangeUnit = (typeof RANGE_UNITS)[number]
 
 export const EFFECT_KINDS = ['dice', 'range'] as const
 
+/** Display order for requirement stats on a resolved card. */
+export const REQUIREMENT_STATS = ['P', 'I', 'E', 'F'] as const
+export type RequirementStat = (typeof REQUIREMENT_STATS)[number]
+
+export const REQUIREMENT_STATS_BY_TYPE: Readonly<Record<ComponentType, readonly RequirementStat[]>> = {
+  Form: ['P', 'I', 'E'],
+  Modifier: ['P', 'F'],
+}
+
+export const REQUIREMENT_MIN = 1
+export const REQUIREMENT_MAX = 10
+
+/** Requirement ("REQ"), written in the catalogue as e.g. "P1" or "E8". */
+export type Requirement = {
+  readonly stat: RequirementStat
+  readonly value: number
+}
+
 export type DiceEffect = {
   readonly kind: 'dice'
   readonly count: number
@@ -38,6 +56,7 @@ export type CatalogueEntry = {
   readonly level: number
   readonly cost: number
   readonly alignment: string
+  readonly requirement: Requirement
   readonly provisional: boolean
 }
 

@@ -29,9 +29,38 @@ function entry(overrides: Partial<CatalogueEntry> & Pick<CatalogueEntry, 'id' | 
     description: 'Test entry.',
     effect: 'test',
     alignment: 'PP',
+    requirement: { stat: 'P', value: 1 },
     ...overrides,
   }
 }
+
+describe('resolveCard requirements (#28)', () => {
+  it('lists each requirement stat used by the card', () => {
+    const result = resolved(resolveCard(STACK, catalogue))
+    expect(result.requirements).toEqual([
+      { stat: 'P', value: 1 },
+      { stat: 'F', value: 1 },
+    ])
+  })
+
+  it('keeps the highest value per stat and orders stats P, I, E, F', () => {
+    const custom = createCatalogue({
+      schemaVersion: 2,
+      entries: [
+        entry({ id: 'a', effects: [], requirement: { stat: 'F', value: 2 }, type: 'Modifier' }),
+        entry({ id: 'b', effects: [], requirement: { stat: 'E', value: 8 } }),
+        entry({ id: 'c', effects: [], requirement: { stat: 'P', value: 3 } }),
+        entry({ id: 'd', effects: [], requirement: { stat: 'P', value: 5 }, type: 'Modifier' }),
+      ],
+    } as CatalogueData)
+    const result = resolved(resolveCard(['a', 'b', 'c', 'd'], custom))
+    expect(result.requirements).toEqual([
+      { stat: 'P', value: 5 },
+      { stat: 'E', value: 8 },
+      { stat: 'F', value: 2 },
+    ])
+  })
+})
 
 describe('resolveCard (#12)', () => {
   it('returns an empty result for an empty card', () => {

@@ -16,6 +16,7 @@ const physical = () => ({
   level: 1,
   cost: 1,
   alignment: 'PP',
+  requirement: 'P1',
 })
 
 const withEntry = (entry: unknown) => ({ schemaVersion: 2, entries: [entry] })
@@ -38,6 +39,7 @@ describe('validateCatalogue: valid fixtures', () => {
       level: 1,
       cost: 1,
       alignment: 'PP',
+      requirement: { stat: 'P', value: 1 },
       effects: [{ kind: 'dice', count: 1, sides: 6, damageType: 'physical' }],
     })
     expect(result.data.entries.every((e) => e.provisional)).toBe(true)
@@ -101,7 +103,7 @@ describe('validateCatalogue: focused failures', () => {
     expect(issuesFor({ schemaVersion: 2 })[0].path).toBe('$.entries')
   })
 
-  it.each(['id', 'name', 'type', 'effect', 'description', 'level', 'cost', 'alignment'])(
+  it.each(['id', 'name', 'type', 'effect', 'description', 'level', 'cost', 'alignment', 'requirement'])(
     'reports a missing %s field',
     (field) => {
       const entry: Record<string, unknown> = physical()
@@ -132,6 +134,33 @@ describe('validateCatalogue: focused failures', () => {
     expect(issuesFor(withEntry({ ...physical(), level: -1 }))[0].path).toBe('$.entries[0].level')
     expect(issuesFor(withEntry({ ...physical(), cost: 1.5 }))[0].path).toBe('$.entries[0].cost')
     expect(issuesFor(withEntry({ ...physical(), cost: '1' }))[0].path).toBe('$.entries[0].cost')
+  })
+
+  it.each([
+    ['Form', 'P1', 'P', 1],
+    ['Form', 'I4', 'I', 4],
+    ['Form', 'e8', 'E', 8],
+    ['Modifier', 'P3', 'P', 3],
+    ['Modifier', ' F10 ', 'F', 10],
+  ])('accepts a %s requirement of %j', (type, requirement, stat, value) => {
+    const result = validateCatalogue(withEntry({ ...physical(), type, requirement }))
+    expect(result.ok).toBe(true)
+    if (!result.ok) return
+    expect(result.data.entries[0].requirement).toEqual({ stat, value })
+  })
+
+  it.each([
+    ['Form', 'F1', 'must use P, I, E'],
+    ['Modifier', 'I2', 'must use P, F'],
+    ['Modifier', 'E2', 'must use P, F'],
+    ['Form', 'P0', 'must be 1-10'],
+    ['Form', 'P11', 'must be 1-10'],
+    ['Form', 'P', 'Expected a requirement'],
+    ['Form', 3, 'Expected a requirement'],
+  ])('rejects a %s requirement of %j', (type, requirement, message) => {
+    const issues = issuesFor(withEntry({ ...physical(), type, requirement }))
+    expect(issues[0].path).toBe('$.entries[0].requirement')
+    expect(issues[0].message).toContain(message)
   })
 
   it('rejects an empty alignment', () => {

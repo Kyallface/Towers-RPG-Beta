@@ -1,4 +1,4 @@
-import { formatEffect } from '@/lib/catalogue/format'
+import { formatEffect, formatRequirement } from '@/lib/catalogue/format'
 import type { CardResolution } from '@/lib/cards/resolve'
 
 export function ResolvedCard({
@@ -59,6 +59,24 @@ export function ResolvedCard({
                 {resolution.effects.map((effect) => (
                   <li key={effect.kind === 'dice' ? `dice-${effect.damageType}` : effect.kind} className="font-pixel text-3xl leading-tight text-primary">
                     {formatEffect(effect)}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="flex flex-col gap-2 border-t-[3px] border-muted pt-4">
+              <h4 className="font-pixel text-xs uppercase tracking-widest text-muted-foreground">
+                <abbr title="Requirement" className="no-underline">
+                  REQ
+                </abbr>
+              </h4>
+              <ul aria-label="Requirements" className="flex flex-wrap gap-2">
+                {resolution.requirements.map((requirement) => (
+                  <li
+                    key={requirement.stat}
+                    className="pixel-frame m-[3px] bg-muted px-3 py-1 font-pixel text-xl text-accent"
+                  >
+                    {formatRequirement(requirement)}
                   </li>
                 ))}
               </ul>

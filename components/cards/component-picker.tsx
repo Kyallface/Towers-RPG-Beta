@@ -1,5 +1,5 @@
 import { Plus } from 'lucide-react'
-import { formatEffect } from '@/lib/catalogue/format'
+import { formatEffect, formatRequirement } from '@/lib/catalogue/format'
 import type { CatalogueEntry, ComponentType } from '@/lib/catalogue/types'
 
 export function ComponentPicker({
@@ -41,7 +41,7 @@ export function ComponentPicker({
                   </span>
                   <span className="text-sm opacity-80">
                     {entry.effects.map(formatEffect).join(', ')} · {entry.cost} pts · Lv {entry.level} ·{' '}
-                    {entry.alignment}
+                    {entry.alignment} · <abbr title="Requirement">REQ</abbr> {formatRequirement(entry.requirement)}
                   </span>
                 </span>
               </button>

@@ -1,5 +1,12 @@
 import type { Catalogue } from '../catalogue/catalogue'
-import type { CatalogueEntry, DieSides, Effect } from '../catalogue/types'
+import {
+  REQUIREMENT_STATS,
+  type CatalogueEntry,
+  type DieSides,
+  type Effect,
+  type Requirement,
+  type RequirementStat,
+} from '../catalogue/types'
 
 export type ResolvedComponent = {
   readonly entry: CatalogueEntry
@@ -19,6 +26,8 @@ export type CardResolution =
       readonly status: 'resolved'
       readonly components: readonly ResolvedComponent[]
       readonly effects: readonly Effect[]
+      /** Highest requirement per stat across all components, in P, I, E, F order. */
+      readonly requirements: readonly Requirement[]
       readonly totalCost: number
       readonly occurrences: number
     }
@@ -38,6 +47,7 @@ export function resolveCard(componentIds: readonly string[], catalogue: Catalogu
   const errors: ResolutionError[] = []
   const quantities = new Map<string, { entry: CatalogueEntry; quantity: number }>()
   const dice = new Map<string, DiceTotal>()
+  const highestRequirement = new Map<RequirementStat, number>()
   let rangeFeet: number | null = null
   let totalCost = 0
 
@@ -57,6 +67,9 @@ export function resolveCard(componentIds: readonly string[], catalogue: Catalogu
     totalCost += entry.cost
     const existing = quantities.get(id)
     quantities.set(id, { entry, quantity: (existing?.quantity ?? 0) + 1 })
+
+    const { stat, value } = entry.requirement
+    highestRequirement.set(stat, Math.max(highestRequirement.get(stat) ?? 0, value))
 
     for (const effect of entry.effects) {
       switch (effect.kind) {
@@ -99,6 +112,10 @@ export function resolveCard(componentIds: readonly string[], catalogue: Catalogu
     status: 'resolved',
     components: Array.from(quantities.values()),
     effects,
+    requirements: REQUIREMENT_STATS.flatMap((stat) => {
+      const value = highestRequirement.get(stat)
+      return value === undefined ? [] : [{ stat, value }]
+    }),
     totalCost,
     occurrences: componentIds.length,
   }

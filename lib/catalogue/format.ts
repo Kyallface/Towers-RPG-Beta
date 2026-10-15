@@ -1,4 +1,4 @@
-import type { Effect } from './types'
+import type { Effect, Requirement } from './types'
 
 export function formatEffect(effect: Effect): string {
   switch (effect.kind) {
@@ -7,4 +7,12 @@ export function formatEffect(effect: Effect): string {
     case 'range':
       return `${effect.value} ${effect.unit} range`
   }
+}
+
+export function formatRequirement(requirement: Requirement): string {
+  return `${requirement.stat}${requirement.value}`
+}
+
+export function formatRequirements(requirements: readonly Requirement[]): string {
+  return requirements.map(formatRequirement).join(' ')
 }
