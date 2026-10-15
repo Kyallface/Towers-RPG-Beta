@@ -33,8 +33,9 @@ export async function saveCard(name: string, description: string, componentIds: 
         },
       ],
     })
-  } catch {
-    return { ok: false, message: 'The card could not be written to content/saved-cards.json.' }
+  } catch (error) {
+    console.error('Failed to save card:', error)
+    return { ok: false, message: 'The card could not be saved to storage. Please try again.' }
   }
 
   revalidatePath('/cards')
@@ -54,8 +55,9 @@ export async function deleteCard(id: string): Promise<ActionResult> {
 
   try {
     await writeSavedCards({ schemaVersion: SAVED_CARDS_SCHEMA_VERSION, cards })
-  } catch {
-    return { ok: false, message: 'The card could not be removed from content/saved-cards.json.' }
+  } catch (error) {
+    console.error('Failed to delete card:', error)
+    return { ok: false, message: 'The card could not be removed from storage. Please try again.' }
   }
 
   revalidatePath('/cards')
