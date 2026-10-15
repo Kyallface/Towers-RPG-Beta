@@ -22,11 +22,11 @@
       "allOf": [
         {
           "if": { "properties": { "type": { "const": "Form" } } },
-          "then": { "properties": { "requirement": { "pattern": "^[PIE](10|[1-9])$" } } }
+          "then": { "properties": { "requirement": { "pattern": "^(Phy|Int|Emo)(10|[1-9])$" } } }
         },
         {
           "if": { "properties": { "type": { "const": "Modifier" } } },
-          "then": { "properties": { "requirement": { "pattern": "^[PF](10|[1-9])$" } } }
+          "then": { "properties": { "requirement": { "pattern": "^(Pow|Fin)(10|[1-9])$" } } }
         }
       ],
       "properties": {
