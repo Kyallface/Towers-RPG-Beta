@@ -1,6 +1,8 @@
 import { formatAlignment, formatEffect, formatRequirement } from '@/lib/catalogue/format'
 import { STAT_LABELS } from '@/lib/catalogue/types'
+import { getPixelIcon } from '@/lib/cards/icons'
 import type { CardResolution } from '@/lib/cards/resolve'
+import { PixelIconGlyph } from './pixel-icon'
 
 export function ResolvedCard({
   resolution,
@@ -9,6 +11,7 @@ export function ResolvedCard({
   headingId = 'resolved-heading',
   live = true,
   footer,
+  icon,
 }: {
   resolution: CardResolution
   title?: string
@@ -16,7 +19,9 @@ export function ResolvedCard({
   headingId?: string
   live?: boolean
   footer?: React.ReactNode
+  icon?: string
 }) {
+  const cardIcon = getPixelIcon(icon)
   return (
     <section
       aria-labelledby={headingId}
@@ -27,9 +32,19 @@ export function ResolvedCard({
         <h3 id={headingId} className="font-pixel text-xl">
           {title}
         </h3>
-        {resolution.status === 'resolved' ? (
-          <span className="font-pixel text-lg">{resolution.totalCost} pts</span>
-        ) : null}
+        <div className="flex shrink-0 items-center gap-3">
+          {resolution.status === 'resolved' ? (
+            <span className="font-pixel text-lg">{resolution.totalCost} pts</span>
+          ) : null}
+          {cardIcon ? (
+            <span
+              data-card-icon={cardIcon.id}
+              className="flex size-11 items-center justify-center bg-primary-foreground text-primary"
+            >
+              <PixelIconGlyph icon={cardIcon} title={`Icon: ${cardIcon.label}`} className="size-8" />
+            </span>
+          ) : null}
+        </div>
       </header>
 
       <div className="pixel-grid flex flex-col gap-5 p-5">

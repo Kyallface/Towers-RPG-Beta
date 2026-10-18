@@ -14,6 +14,7 @@ import { MAX_CARD_DESCRIPTION_LENGTH, MAX_CARD_NAME_LENGTH } from '@/lib/cards/s
 import { PixelButton } from '@/components/pixel-button'
 import { ComponentPicker } from './component-picker'
 import { DraftComponents } from './draft-components'
+import { IconPicker } from './icon-picker'
 import { ResolvedCard } from './resolved-card'
 
 export function CardBuilder({ data }: { data: CatalogueData }) {
@@ -24,6 +25,7 @@ export function CardBuilder({ data }: { data: CatalogueData }) {
   const [draft, setDraft] = useState<CardDraft>(EMPTY_DRAFT)
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
+  const [icon, setIcon] = useState('')
   const [notice, setNotice] = useState<string | null>(null)
   const [isSaving, startSaving] = useTransition()
 
@@ -46,11 +48,12 @@ export function CardBuilder({ data }: { data: CatalogueData }) {
     apply({ ok: true, draft: EMPTY_DRAFT })
     setName('')
     setDescription('')
+    setIcon('')
   }
 
   function handleSave() {
     startSaving(async () => {
-      const result = await saveCard(name, description, [...draft.componentIds])
+      const result = await saveCard(name, description, [...draft.componentIds], icon || undefined)
       if (!result.ok) {
         setNotice(result.message)
         return
@@ -110,6 +113,7 @@ export function CardBuilder({ data }: { data: CatalogueData }) {
               className="pixel-frame m-[3px] resize-y bg-muted px-3 py-2 leading-relaxed text-foreground placeholder:text-muted-foreground focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-ring"
             />
           </div>
+          <IconPicker value={icon} onChange={setIcon} />
         </fieldset>
         <ComponentPicker
           type="Form"
@@ -143,7 +147,7 @@ export function CardBuilder({ data }: { data: CatalogueData }) {
             type="button"
             variant="secondary"
             onClick={handleClear}
-            disabled={draft.componentIds.length === 0 && name.length === 0 && description.length === 0}
+            disabled={draft.componentIds.length === 0 && name.length === 0 && description.length === 0 && icon === ''}
           >
             <Eraser aria-hidden="true" className="size-5" />
             Clear
@@ -162,6 +166,7 @@ export function CardBuilder({ data }: { data: CatalogueData }) {
           resolution={resolution}
           title={name.trim() || 'Resolved card'}
           description={description.trim() || undefined}
+          icon={icon || undefined}
         />
       </div>
     </div>
