@@ -15,6 +15,11 @@
   --accent: #e0a526;
   --accent-foreground: #161a22;
   --ring: #0e7c7b;
+  --stat-phy: #c0392b;
+  --stat-int: #23843a;
+  --stat-emo: #2563c9;
+  --stat-pow: #c2560f;
+  --stat-fin: #8a3fb0;
   --pixel: 3px;
 }
 
@@ -31,6 +36,11 @@
   --accent: #e0a526;
   --accent-foreground: #12151c;
   --ring: #2ec4b6;
+  --stat-phy: #ff6b5e;
+  --stat-int: #5fd47a;
+  --stat-emo: #6aa8ff;
+  --stat-pow: #ff9f43;
+  --stat-fin: #c58cf0;
 }
 
 @theme inline {
@@ -46,6 +56,11 @@
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
   --color-ring: var(--ring);
+  --color-stat-phy: var(--stat-phy);
+  --color-stat-int: var(--stat-int);
+  --color-stat-emo: var(--stat-emo);
+  --color-stat-pow: var(--stat-pow);
+  --color-stat-fin: var(--stat-fin);
   --font-sans: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
   --font-pixel: var(--font-pixelify), ui-monospace, monospace;
 }

@@ -1,6 +1,7 @@
 import { Plus } from 'lucide-react'
 import { formatEffect, formatRequirement } from '@/lib/catalogue/format'
 import type { CatalogueEntry, ComponentType } from '@/lib/catalogue/types'
+import { StatText } from './stat-text'
 
 export function ComponentPicker({
   type,
@@ -31,7 +32,7 @@ export function ComponentPicker({
               <button
                 type="button"
                 onClick={() => onAdd(entry.id, type)}
-                className="pixel-frame m-[3px] flex items-center gap-3 bg-card px-4 py-2 text-left text-card-foreground transition-colors hover:bg-primary hover:text-primary-foreground"
+                className="group pixel-frame m-[3px] flex items-center gap-3 bg-card px-4 py-2 text-left text-card-foreground transition-colors hover:bg-primary hover:text-primary-foreground"
               >
                 <Plus aria-hidden="true" className="size-4 shrink-0" />
                 <span className="flex flex-col">
@@ -41,7 +42,9 @@ export function ComponentPicker({
                   </span>
                   <span className="text-sm opacity-80">
                     {entry.effects.map(formatEffect).join(', ')} · {entry.cost} pts · Lv {entry.level} ·{' '}
-                    {entry.alignment} · <abbr title="Requirement">REQ</abbr> {formatRequirement(entry.requirement)}
+                    <StatText text={entry.alignment} inheritClassName="group-hover:text-current" /> ·{' '}
+                    <abbr title="Requirement">REQ</abbr>{' '}
+                    <StatText text={formatRequirement(entry.requirement)} inheritClassName="group-hover:text-current" />
                   </span>
                 </span>
               </button>

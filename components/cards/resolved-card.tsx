@@ -3,6 +3,7 @@ import { STAT_LABELS } from '@/lib/catalogue/types'
 import { getPixelIcon } from '@/lib/cards/icons'
 import type { CardResolution } from '@/lib/cards/resolve'
 import { PixelIconGlyph } from './pixel-icon'
+import { StatText } from './stat-text'
 
 export function ResolvedCard({
   resolution,
@@ -51,7 +52,9 @@ export function ResolvedCard({
         {description ? (
           <div className="flex flex-col gap-2 border-b-[3px] border-muted pb-4">
             <h4 className="font-pixel text-xs uppercase tracking-widest text-muted-foreground">Description</h4>
-            <p className="whitespace-pre-line text-pretty leading-relaxed">{description}</p>
+            <p className="whitespace-pre-line text-pretty leading-relaxed">
+              <StatText text={description} />
+            </p>
           </div>
         ) : null}
         {resolution.status === 'empty' ? (
@@ -83,7 +86,7 @@ export function ResolvedCard({
             <div className="flex flex-col gap-2 border-t-[3px] border-muted pt-4">
               <h4 className="font-pixel text-xs uppercase tracking-widest text-muted-foreground">Alignment</h4>
               <p className="font-pixel text-2xl text-primary" aria-label={`Alignment ${resolution.alignment.map((stat) => STAT_LABELS[stat]).join(' ')}`}>
-                {formatAlignment(resolution.alignment)}
+                <StatText text={formatAlignment(resolution.alignment)} />
               </p>
             </div>
 
@@ -99,7 +102,7 @@ export function ResolvedCard({
                     key={requirement.stat}
                     className="pixel-frame m-[3px] bg-muted px-3 py-1 font-pixel text-xl text-accent"
                   >
-                    {formatRequirement(requirement)}
+                    <StatText text={formatRequirement(requirement)} />
                   </li>
                 ))}
               </ul>
