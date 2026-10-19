@@ -1,4 +1,4 @@
-import { readFile } from 'node:fs/promises'
+import { readFile, stat } from 'node:fs/promises'
 import path from 'node:path'
 
 const CONTENT_DIR = path.join(process.cwd(), 'content')
@@ -14,6 +14,15 @@ async function readContentFile(name: string): Promise<string | null> {
 /** Server-only: raw Markdown from content/rules.md, or null when the file is missing. */
 export function readRules(): Promise<string | null> {
   return readContentFile('rules.md')
+}
+
+/** Server-only: last modified time of content/rules.md, or null when the file is missing. */
+export async function readRulesModifiedAt(): Promise<Date | null> {
+  try {
+    return (await stat(path.join(CONTENT_DIR, 'rules.md'))).mtime
+  } catch {
+    return null
+  }
 }
 
 /** Server-only: raw JSON text from content/glossary.json, or null when the file is missing. */

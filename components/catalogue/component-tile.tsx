@@ -1,5 +1,6 @@
 import { formatEffect, formatRequirement } from '@/lib/catalogue/format'
 import type { CatalogueEntry } from '@/lib/catalogue/types'
+import { StatText } from '@/components/cards/stat-text'
 
 const TYPE_BADGE = {
   Form: 'bg-primary text-primary-foreground',
@@ -29,7 +30,9 @@ export function ComponentTile({ entry }: { entry: CatalogueEntry }) {
         ))}
       </ul>
 
-      <p className="leading-relaxed text-muted-foreground text-pretty">{entry.description}</p>
+      <p className="leading-relaxed text-muted-foreground text-pretty">
+        <StatText text={entry.description} />
+      </p>
 
       <footer className="mt-auto flex flex-wrap items-center justify-between gap-3 border-t-[3px] border-muted pt-3">
         <dl className="flex gap-6 font-pixel text-sm">
@@ -43,13 +46,17 @@ export function ComponentTile({ entry }: { entry: CatalogueEntry }) {
           </div>
           <div className="flex gap-2">
             <dt className="text-muted-foreground">Alignment</dt>
-            <dd>{entry.alignment}</dd>
+            <dd>
+              <StatText text={entry.alignment} />
+            </dd>
           </div>
           <div className="flex gap-2">
             <dt className="text-muted-foreground">
               <abbr title="Requirement">REQ</abbr>
             </dt>
-            <dd>{formatRequirement(entry.requirement)}</dd>
+            <dd>
+              <StatText text={formatRequirement(entry.requirement)} />
+            </dd>
           </div>
         </dl>
         {entry.provisional ? (

@@ -1,3 +1,5 @@
+import { isPixelIconId } from './icons'
+
 /**
  * Saved (resolved) cards persisted to content/saved-cards.json. Only the canonical
  * component ID list is stored; stats are always re-resolved from the current catalogue.
@@ -8,6 +10,8 @@ export type SavedCard = {
   readonly id: string
   readonly name: string
   readonly description?: string
+  /** Optional pixel icon ID from lib/cards/icons. Unknown IDs render as no icon. */
+  readonly icon?: string
   readonly componentIds: readonly string[]
   readonly savedAt: string
 }
@@ -38,6 +42,7 @@ function isSavedCard(value: unknown): value is SavedCard {
     value.id.length > 0 &&
     typeof value.name === 'string' &&
     (value.description === undefined || typeof value.description === 'string') &&
+    (value.icon === undefined || typeof value.icon === 'string') &&
     typeof value.savedAt === 'string' &&
     Array.isArray(value.componentIds) &&
     value.componentIds.every((id) => typeof id === 'string')
@@ -72,6 +77,7 @@ export type CardInputResult =
       readonly ok: true
       readonly name: string
       readonly description: string
+      readonly icon: string | undefined
       readonly componentIds: readonly string[]
     }
   | { readonly ok: false; readonly message: string }
@@ -82,6 +88,7 @@ export function validateCardInput(
   description: unknown,
   componentIds: unknown,
   knownIds: ReadonlySet<string>,
+  icon: unknown = undefined,
 ): CardInputResult {
   const trimmed = typeof name === 'string' ? name.trim() : ''
   if (trimmed.length === 0) return { ok: false, message: 'Give the card a name before saving.' }
@@ -104,5 +111,14 @@ export function validateCardInput(
   }
   const unknown = componentIds.find((id) => !knownIds.has(id))
   if (unknown) return { ok: false, message: `"${unknown}" is not in the catalogue, so the card was not saved.` }
-  return { ok: true, name: trimmed, description: trimmedDescription, componentIds: [...componentIds] }
+  if (icon !== undefined && icon !== '' && !isPixelIconId(icon)) {
+    return { ok: false, message: 'That icon is not available, so the card was not saved.' }
+  }
+  return {
+    ok: true,
+    name: trimmed,
+    description: trimmedDescription,
+    icon: isPixelIconId(icon) ? icon : undefined,
+    componentIds: [...componentIds],
+  }
 }
